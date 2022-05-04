@@ -46,11 +46,10 @@ namespace zFramework.Hotfix.Toolkit
     #endregion
     public class HotfixConfiguration : ScriptableObject
     {
-        [Header("热更 DLL 存储的文件展名：")]
+        [Header("热更 DLL 存储的文件展名："),ReadOnly]
         public string fileExtension = ".bytes";
         [Header("热更文件测试模式：")]
         public bool testLoad = false;
-
         [Header("需要热更的程序集定义文件：")]
         public List<AssemblyData> assemblies = new List<AssemblyData>();
 
@@ -74,7 +73,7 @@ namespace zFramework.Hotfix.Toolkit
         public static void SyncAssemblyRawData(bool forceCompilie = false)
         {
             // 将要进入播放模式时会导致 Type 实例意外回收，同时避免编译导致的异常，故而规避之！
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            if (EditorApplication.isPlayingOrWillChangePlaymode||!Instance) return;
             // 1.  dll 编译存放处
             var lib_dir = Path.Combine(Application.dataPath, "..", "Library\\ScriptAssemblies");
             foreach (var item in Instance.assemblies)
@@ -117,7 +116,11 @@ namespace zFramework.Hotfix.Toolkit
                                 {
                                     FileInfo fileinfo = new FileInfo(item.OutputPath);
                                     File.Copy(temp, fileinfo.FullName, true);
-                                    item.hotfixAssembly = AssetDatabase.LoadMainAssetAtPath(item.OutputPath) as TextAsset;
+                                    if (fileinfo.Exists)
+                                    {
+                                        item.UpdateFacade();
+                                        Debug.Log($"{nameof(HotfixConfiguration)}: {fileinfo.FullName}");
+                                    }
                                     Debug.Log($"{nameof(HotfixConfiguration)} 热更程序集： <color=yellow>{fileinfo.Name} </color> 完成构建！");
                                 }
                             }
@@ -153,14 +156,14 @@ namespace zFramework.Hotfix.Toolkit
         }
 
         [Serializable]
-        public class AssemblyData : ISerializationCallbackReceiver
+        public class AssemblyData 
         {
             [Header("热更的程序集")]
             public AssemblyDefinitionAsset assembly;
             [Header("Dll 转存文件夹"), FolderValidate]
             public DefaultAsset folder;
             [SerializeField, Header("Dll 热更文件"), ReadOnly]
-            public TextAsset hotfixAssembly;
+            TextAsset hotfixAssembly;
             [SerializeField, Header("Dll 最后更新时间"), ReadOnly]
             string lastUpdateTime;
             [HideInInspector]
@@ -185,9 +188,9 @@ namespace zFramework.Hotfix.Toolkit
                 var data = JsonUtility.FromJson<SimplifiedAssemblyData>(assembly.text);
                 return $"{AssetDatabase.GetAssetPath(folder)}/{data.name}{Instance.fileExtension}";
             }
-            public void OnBeforeSerialize() { }
-            public void OnAfterDeserialize()
+            internal void UpdateFacade()
             {
+                hotfixAssembly = AssetDatabase.LoadMainAssetAtPath(OutputPath) as TextAsset;
                 lastUpdateTime = new DateTime(lastWriteTime).ToString("yyyy-MM-dd HH:mm:ss");
             }
         }

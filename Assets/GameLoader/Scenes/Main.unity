@@ -679,6 +679,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 941bb032a99cdd847b6282da3659d4d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  assemblyAssetKey: assemblybytes
   button: {fileID: 1325342301}
 --- !u!1 &1287991331
 GameObject:

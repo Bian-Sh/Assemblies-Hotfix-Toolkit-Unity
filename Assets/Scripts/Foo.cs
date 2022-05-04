@@ -11,8 +11,8 @@ namespace zFramework.Hotfix.Examples
         void Start()
         {
             button.onClick.AddListener(uuu);
-            close_button.onClick.AddListener(OnCloseBTClicked);
             dropdown.onValueChanged.AddListener(OnDropdownValuechanged);
+            close_button.onClick.AddListener(OnCloseBTClicked);
         }
 
         private void OnDropdownValuechanged(int arg0)
@@ -32,7 +32,7 @@ namespace zFramework.Hotfix.Examples
         int index = 0;
         private void uuu()
         {
-            index += 150;
+            index += 1;
             text.text = $"{index}";
         }
 

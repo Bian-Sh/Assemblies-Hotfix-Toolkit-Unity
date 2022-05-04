@@ -32,21 +32,22 @@ namespace zFramework.Hotfix.Examples
 
         async Task OnLoad()
         {
+            button.interactable = false;
 #if UNITY_EDITOR
             if (Toolkit.HotfixConfiguration.Instance.testLoad)
 #endif
             {
-                button.interactable = false;
                 handler = Addressables.LoadAssetAsync<TextAsset>(assemblyAssetKey);
                 var data = await handler.Task as TextAsset;
                 if (data)
                 {
                     var asm = AppDomain.CurrentDomain.Load(data.bytes);
-                    MethodInfo method = asm.GetType("Foo").GetMethod("MainFunc");
-                    method.Invoke(null, null);
+                    Debug.Log($"{nameof(GameLoader)}: {asm.FullName}");
+                    var type = asm.GetType("zFramework.Hotfix.Examples.Foo");
+                    MethodInfo method = type.GetMethod("MainFunc", BindingFlags.Static | BindingFlags.Public);
+                    method?.Invoke(null, null);
                 }
             }
-
             handler_scene = Addressables.LoadSceneAsync("Hotfixed.unity", activateOnLoad: false);
             sceneInstance = (SceneInstance)await handler_scene.Task;
             button.interactable = true;
