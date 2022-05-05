@@ -32,7 +32,7 @@ namespace zFramework.Hotfix.Examples
         int index = 0;
         private void uuu()
         {
-            index += 1;
+            index +=888;
             text.text = $"{index}";
         }
 

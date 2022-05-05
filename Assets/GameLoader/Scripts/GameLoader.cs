@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -43,6 +43,7 @@ namespace zFramework.Hotfix.Examples
                 {
                     var asm = AppDomain.CurrentDomain.Load(data.bytes);
                     Debug.Log($"{nameof(GameLoader)}: {asm.FullName}");
+                    // 请注意，asm.GetType("Foo") 会导致逻辑卡死，后面要确认是卡在了哪儿。
                     var type = asm.GetType("zFramework.Hotfix.Examples.Foo");
                     MethodInfo method = type.GetMethod("MainFunc", BindingFlags.Static | BindingFlags.Public);
                     method?.Invoke(null, null);

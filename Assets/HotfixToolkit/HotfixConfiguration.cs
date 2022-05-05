@@ -46,7 +46,7 @@ namespace zFramework.Hotfix.Toolkit
     #endregion
     public class HotfixConfiguration : ScriptableObject
     {
-        [Header("热更 DLL 存储的文件展名："),ReadOnly]
+        [Header("热更 DLL 存储的文件展名："), ReadOnly]
         public string fileExtension = ".bytes";
         [Header("热更文件测试模式：")]
         public bool testLoad = false;
@@ -73,7 +73,8 @@ namespace zFramework.Hotfix.Toolkit
         public static void SyncAssemblyRawData(bool forceCompilie = false)
         {
             // 将要进入播放模式时会导致 Type 实例意外回收，同时避免编译导致的异常，故而规避之！
-            if (EditorApplication.isPlayingOrWillChangePlaymode||!Instance) return;
+            if (EditorApplication.isPlayingOrWillChangePlaymode || !Instance) return;
+
             // 1.  dll 编译存放处
             var lib_dir = Path.Combine(Application.dataPath, "..", "Library\\ScriptAssemblies");
             foreach (var item in Instance.assemblies)
@@ -91,7 +92,6 @@ namespace zFramework.Hotfix.Toolkit
                         if (forceCompilie || item.lastWriteTime < lastWriteTime)
                         {
                             item.lastWriteTime = lastWriteTime;
-
                             UniAssembly assembly = CompilationPipeline.GetAssemblies(AssembliesType.Player).FirstOrDefault(v => v.name == item.assembly.name);
                             if (null != assembly)
                             {
@@ -105,23 +105,40 @@ namespace zFramework.Hotfix.Toolkit
                                 builder.buildTarget = EditorUserBuildSettings.activeBuildTarget;
                                 builder.buildTargetGroup = buildTargetGroup;
                                 builder.excludeReferences = new string[] { assembly.outputPath };
-                                builder.additionalDefines = assembly.defines;
-                                builder.compilerOptions = assembly.compilerOptions;
-                                builder.buildFinished += OnBuildFinished;
+                                //builder.additionalDefines = assembly.defines;
+                                //builder.compilerOptions = assembly.compilerOptions;
+                                builder.buildFinished += (arg1, arg2) =>
+                                 {
+                                     bool noErr = true;
+                                     foreach (var msg in arg2)
+                                     {
+                                         if (msg.type == CompilerMessageType.Error)
+                                         {
+                                             Debug.LogError(msg.message);
+                                             noErr = false;
+                                         }
+                                         else if (msg.type == CompilerMessageType.Warning)
+                                         {
+                                             Debug.LogWarning(msg.message);
+                                         }
+                                         else
+                                         {
+                                             Debug.Log(msg.message);
+                                         }
+                                     }
+                                     if (noErr)
+                                     {
+                                         FileUtil.ReplaceFile(temp, item.OutputPath);
+                                         item.UpdateInformation();
+                                     }
+                                 };
                                 if (!builder.Build())
                                 {
                                     Debug.LogError($"{nameof(HotfixConfiguration)}: Assembly {item.Dll} Build Fail！");
                                 }
                                 else
                                 {
-                                    FileInfo fileinfo = new FileInfo(item.OutputPath);
-                                    File.Copy(temp, fileinfo.FullName, true);
-                                    if (fileinfo.Exists)
-                                    {
-                                        item.UpdateFacade();
-                                        Debug.Log($"{nameof(HotfixConfiguration)}: {fileinfo.FullName}");
-                                    }
-                                    Debug.Log($"{nameof(HotfixConfiguration)} 热更程序集： <color=yellow>{fileinfo.Name} </color> 完成构建！");
+                                  Debug.Log($"{nameof(HotfixConfiguration)} 热更程序集： <color=yellow>{item.Dll} </color> 完成构建！");
                                 }
                             }
                         }
@@ -136,27 +153,10 @@ namespace zFramework.Hotfix.Toolkit
             }
         }
 
-        private static void OnBuildFinished(string arg1, CompilerMessage[] arg2)
-        {
-            foreach (var msg in arg2)
-            {
-                if (msg.type == CompilerMessageType.Error)
-                {
-                    Debug.LogError(msg.message);
-                }
-                else if (msg.type == CompilerMessageType.Warning)
-                {
-                    Debug.LogWarning(msg.message);
-                }
-                else
-                {
-                    Debug.Log(msg.message);
-                }
-            }
-        }
+
 
         [Serializable]
-        public class AssemblyData 
+        public class AssemblyData
         {
             [Header("热更的程序集")]
             public AssemblyDefinitionAsset assembly;
@@ -166,29 +166,17 @@ namespace zFramework.Hotfix.Toolkit
             TextAsset hotfixAssembly;
             [SerializeField, Header("Dll 最后更新时间"), ReadOnly]
             string lastUpdateTime;
+            [NonSerialized]
+            SimplifiedAssemblyData data; //在Unity中，类类型字段在可序列化对象中永不为 null，故而声明：NonSerialized
+            // 避免频繁的加载数据（因为data未参与序列化且调用前脚本Reload过，所以在本应用场景下能够保证加载的数据总是最新的）
+            SimplifiedAssemblyData Data =>data??(data= JsonUtility.FromJson<SimplifiedAssemblyData>(assembly.text));
             [HideInInspector]
             public long lastWriteTime;
-            public string OutputPath => CombinePath();
-            public string Dll => GetFileName();
+            public string OutputPath => $"{AssetDatabase.GetAssetPath(folder)}/{Data.name}{Instance.fileExtension}";
+            public string Dll => $"{Data.name}.dll";
             public bool IsValid => assembly && folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
-            public bool AllowUnsafeCode => CheckIfUnsafeCodeAllow();
-
-            private bool CheckIfUnsafeCodeAllow()
-            {
-                var data = JsonUtility.FromJson<SimplifiedAssemblyData>(assembly.text);
-                return data.allowUnsafeCode;
-            }
-            private string GetFileName()
-            {
-                var data = JsonUtility.FromJson<SimplifiedAssemblyData>(assembly.text);
-                return $"{data.name}.dll";
-            }
-            private string CombinePath()
-            {
-                var data = JsonUtility.FromJson<SimplifiedAssemblyData>(assembly.text);
-                return $"{AssetDatabase.GetAssetPath(folder)}/{data.name}{Instance.fileExtension}";
-            }
-            internal void UpdateFacade()
+            public bool AllowUnsafeCode => Data.allowUnsafeCode;
+            internal void UpdateInformation()
             {
                 hotfixAssembly = AssetDatabase.LoadMainAssetAtPath(OutputPath) as TextAsset;
                 lastUpdateTime = new DateTime(lastWriteTime).ToString("yyyy-MM-dd HH:mm:ss");
