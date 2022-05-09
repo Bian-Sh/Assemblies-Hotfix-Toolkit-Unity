@@ -39,6 +39,7 @@ namespace zFramework.Hotfix.Examples
             {
                 handler = Addressables.LoadAssetAsync<TextAsset>(assemblyAssetKey);
                 var data = await handler.Task as TextAsset;
+
                 if (data)
                 {
                     var asm = AppDomain.CurrentDomain.Load(data.bytes);
@@ -47,6 +48,10 @@ namespace zFramework.Hotfix.Examples
                     var type = asm.GetType("zFramework.Hotfix.Examples.Foo");
                     MethodInfo method = type.GetMethod("MainFunc", BindingFlags.Static | BindingFlags.Public);
                     method?.Invoke(null, null);
+                }
+                else
+                {
+                    Debug.LogError($"{nameof(GameLoader)}: Assembly Load Failed!");
                 }
             }
             handler_scene = Addressables.LoadSceneAsync("Hotfixed.unity", activateOnLoad: false);

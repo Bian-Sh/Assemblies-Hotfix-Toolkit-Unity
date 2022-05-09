@@ -101,6 +101,7 @@ namespace zFramework.Hotfix.Toolkit
                                 builder.compilerOptions.ApiCompatibilityLevel = PlayerSettings.GetApiCompatibilityLevel(buildTargetGroup);
                                 builder.additionalReferences = assembly.allReferences;
                                 builder.flags = AssemblyBuilderFlags.None;
+                                // todo: 以下动作会导致程序集完成编译后IDE 报错，待确认：减少编译频率，变成 aa build 时编译，同时看能不能将 csproj 回到原点
                                 builder.referencesOptions = ReferencesOptions.UseEngineModules;
                                 builder.buildTarget = EditorUserBuildSettings.activeBuildTarget;
                                 builder.buildTargetGroup = buildTargetGroup;
@@ -153,8 +154,6 @@ namespace zFramework.Hotfix.Toolkit
             }
         }
 
-
-
         [Serializable]
         public class AssemblyData
         {
@@ -162,10 +161,12 @@ namespace zFramework.Hotfix.Toolkit
             public AssemblyDefinitionAsset assembly;
             [Header("Dll 转存文件夹"), FolderValidate]
             public DefaultAsset folder;
+#pragma warning disable IDE0052 // 删除未读的私有成员
             [SerializeField, Header("Dll 热更文件"), ReadOnly]
             TextAsset hotfixAssembly;
             [SerializeField, Header("Dll 最后更新时间"), ReadOnly]
             string lastUpdateTime;
+#pragma warning restore IDE0052 // 删除未读的私有成员
             [NonSerialized]
             SimplifiedAssemblyData data; //在Unity中，类类型字段在可序列化对象中永不为 null，故而声明：NonSerialized
             // 避免频繁的加载数据（因为data未参与序列化且调用前脚本Reload过，所以在本应用场景下能够保证加载的数据总是最新的）

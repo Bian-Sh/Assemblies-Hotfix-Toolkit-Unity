@@ -32,7 +32,8 @@ namespace zFramework.Hotfix.Examples
         int index = 0;
         private void uuu()
         {
-            index +=888;
+            index +=33333; 
+            //index +=1555;//这俩互换不会触发 aa content update
             text.text = $"{index}";
         }
 

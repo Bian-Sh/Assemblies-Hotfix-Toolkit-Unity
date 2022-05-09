@@ -7,7 +7,7 @@ namespace zFramework.Hotfix.Toolkit
         [MenuItem("Tools/Hotfixed")]
         static void OpenWindow()
         {
-            var window = EditorWindow.GetWindow<HotfixedConfigWindow>(true, "Dll 热更处理配置工具", true);
+            var window = GetWindow<HotfixedConfigWindow>(true, "Dll 热更处理配置工具", true);
             window.editor = Editor.CreateEditor(HotfixConfiguration.Instance);
         }
         private void OnGUI()
