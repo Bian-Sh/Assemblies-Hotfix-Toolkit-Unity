@@ -1,0 +1,16 @@
+{
+    "name": "zFramework.Hotfix.Examples",
+    "rootNamespace": "zFramework",
+    "references": [
+        "GUID:0874c2c39a32f31428a64c4f97347970"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using UnityEngine.UI;
 namespace zFramework.Hotfix.Examples
 {
@@ -32,8 +32,8 @@ namespace zFramework.Hotfix.Examples
         int index = 0;
         private void uuu()
         {
-            index +=33333; 
-            //index +=1555;//’‚¡©ª•ªª≤ªª·¥•∑¢ aa content update
+            index +=555;
+            //index +=1555;//index +=33333Ëøô‰ø©‰∫íÊç¢‰∏ç‰ºöËß¶Âèë aa content update ?
             text.text = $"{index}";
         }
 

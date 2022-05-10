@@ -10,7 +10,8 @@ namespace zFramework.Hotfix.Examples
 {
     public class GameLoader : MonoBehaviour
     {
-        public string assemblyAssetKey = "zFramework.Hotfix.Examples.bytes";
+        private string assemblyAssetKey = "zFramework.Hotfix.Examples.bytes";
+        private string assemblyAssetKey_ref = "zFramework.Hotfix.Demo.bytes";
         public Button button;
         private void Start()
         {
@@ -34,11 +35,16 @@ namespace zFramework.Hotfix.Examples
         {
             button.interactable = false;
 #if UNITY_EDITOR
-            if (Toolkit.HotfixConfiguration.Instance.testLoad)
+            if (Toolkit.AssemblyHotfixManager.Instance.testLoad)
 #endif
             {
-                handler = Addressables.LoadAssetAsync<TextAsset>(assemblyAssetKey);
+                // 先加载依赖
+                handler = Addressables.LoadAssetAsync<TextAsset>(assemblyAssetKey_ref);
                 var data = await handler.Task as TextAsset;
+                 AppDomain.CurrentDomain.Load(data.bytes);
+
+                handler = Addressables.LoadAssetAsync<TextAsset>(assemblyAssetKey);
+                data = await handler.Task as TextAsset;
 
                 if (data)
                 {

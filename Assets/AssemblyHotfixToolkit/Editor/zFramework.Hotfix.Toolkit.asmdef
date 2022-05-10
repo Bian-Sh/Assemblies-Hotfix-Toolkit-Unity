@@ -1,7 +1,12 @@
 {
     "name": "zFramework.Hotfix.Toolkit",
     "rootNamespace": "zFramework",
-    "references": [],
+    "references": [
+        "Unity.Addressables.Editor",
+        "Unity.Addressables",
+        "Unity.ScriptableBuildPipeline.Editor",
+        "Unity.ScriptableBuildPipeline"
+    ],
     "includePlatforms": [
         "Editor"
     ],

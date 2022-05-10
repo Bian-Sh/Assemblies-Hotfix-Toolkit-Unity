@@ -22,7 +22,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
   - m_GUID: b2613a85f2af5c24e91334be2ca82c72
-    m_Address: assemblybytes
+    m_Address: zFramework.Hotfix.Examples.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 539dd83034d111b47b7e69ff0e865eb1
+    m_Address: zFramework.Hotfix.Demo.bytes
     m_ReadOnly: 0
     m_SerializedLabels: []
   m_ReadOnly: 0

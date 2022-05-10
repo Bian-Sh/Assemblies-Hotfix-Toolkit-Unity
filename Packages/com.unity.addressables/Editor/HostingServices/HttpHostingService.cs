@@ -4,6 +4,8 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -13,7 +15,7 @@ namespace UnityEditor.AddressableAssets.HostingServices
     /// <summary>
     /// HTTP implementation of hosting service.
     /// </summary>
-    public class HttpHostingService : BaseHostingService
+    public class HttpHostingService : BaseHostingService, IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
         /// <summary>
         /// Options for standard Http result codes
@@ -192,6 +194,8 @@ namespace UnityEditor.AddressableAssets.HostingServices
             }
         }
 
+        public int callbackOrder => throw new NotImplementedException();
+
         /// <summary>
         /// Create a new <see cref="HttpHostingService"/>
         /// </summary>
@@ -203,6 +207,8 @@ namespace UnityEditor.AddressableAssets.HostingServices
             Compilation.CompilationPipeline.compilationStarted += CompilationPipeline_compilationStarted;
             Compilation.CompilationPipeline.compilationFinished += CompilationPipeline_compilationFinished;
         }
+
+
 
         private void CompilationPipeline_compilationFinished(object obj)
         {
@@ -523,6 +529,18 @@ namespace UnityEditor.AddressableAssets.HostingServices
                 var endPoint = socket.LocalEndPoint as IPEndPoint;
                 return endPoint != null ? endPoint.Port : 0;
             }
+        }
+
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            WasEnabled = IsHostingServiceRunning;
+            StopHostingService();
+        }
+
+        public void OnPostprocessBuild(BuildReport report)
+        {
+            if (WasEnabled)
+                StartHostingService();
         }
     }
 }
