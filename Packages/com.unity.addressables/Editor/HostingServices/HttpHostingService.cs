@@ -194,7 +194,7 @@ namespace UnityEditor.AddressableAssets.HostingServices
             }
         }
 
-        public int callbackOrder => throw new NotImplementedException();
+        public int callbackOrder =>0;
 
         /// <summary>
         /// Create a new <see cref="HttpHostingService"/>

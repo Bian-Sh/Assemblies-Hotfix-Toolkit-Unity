@@ -111,7 +111,7 @@ MonoBehaviour:
           m_Key: HostingServiceUploadSpeed
         - m_AssemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
           m_ClassName: System.String
-          m_Data: ServerData/Android
+          m_Data: ServerData/StandaloneWindows64
           m_Key: ContentRoot
         - m_AssemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
           m_ClassName: System.Boolean
@@ -126,6 +126,6 @@ MonoBehaviour:
           m_Data: 1
           m_Key: InstanceId
     m_Settings: {fileID: 11400000}
-    m_NextInstanceId: 2
+    m_NextInstanceId: 3
     m_RegisteredServiceTypeRefs:
     - UnityEditor.AddressableAssets.HostingServices.HttpHostingService, Unity.Addressables.Editor

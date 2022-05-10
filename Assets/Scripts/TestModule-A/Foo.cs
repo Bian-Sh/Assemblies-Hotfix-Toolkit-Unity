@@ -11,8 +11,8 @@ namespace zFramework.Hotfix.Examples
         void Start()
         {
             button.onClick.AddListener(uuu);
-            dropdown.onValueChanged.AddListener(OnDropdownValuechanged);
             close_button.onClick.AddListener(OnCloseBTClicked);
+            dropdown.onValueChanged.AddListener(OnDropdownValuechanged);
         }
 
         private void OnDropdownValuechanged(int arg0)
@@ -32,7 +32,7 @@ namespace zFramework.Hotfix.Examples
         int index = 0;
         private void uuu()
         {
-            index +=555;
+            index +=9999;
             //index +=1555;//index +=33333这俩互换不会触发 aa content update ?
             text.text = $"{index}";
         }

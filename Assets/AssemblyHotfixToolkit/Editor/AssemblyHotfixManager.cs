@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Interfaces;
+using UnityEditor.Build.Player;
 using UnityEditorInternal;
 using UnityEngine;
 namespace zFramework.Hotfix.Toolkit
@@ -68,7 +69,7 @@ namespace zFramework.Hotfix.Toolkit
         [Header("热更文件测试模式：")]
         public bool testLoad = false;
         [Header("需要热更的程序集定义文件：")]
-        public List<AssemblyData> assemblies = new List<AssemblyData>();
+        public List<AssemblyData> assemblies ;
 
         #region 单例
         public static AssemblyHotfixManager Instance => LoadConfiguration();
@@ -79,10 +80,8 @@ namespace zFramework.Hotfix.Toolkit
             {
                 var guids = AssetDatabase.FindAssets($"{nameof(AssemblyHotfixManager)} t:Script");
                 var path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                path = path.Substring(0,path.LastIndexOf('/'));
-                path = $"{path}/Data";
+                path = path.Substring(0,path.LastIndexOf("/Editor/"));
                 var file =  $"{path}/Data/{ObjectNames.NicifyVariableName(nameof(AssemblyHotfixManager))}.asset";
-                Debug.Log($"{nameof(AssemblyHotfixManager)}:{path}\n {file}");
                 instance = AssetDatabase.LoadAssetAtPath<AssemblyHotfixManager>(file);
                 if (!instance)
                 {
@@ -91,7 +90,6 @@ namespace zFramework.Hotfix.Toolkit
                     AssetDatabase.Refresh();
                 }
             }
-            Debug.Log($"{nameof(AssemblyHotfixManager)}: instance {instance}");
             return instance;
         }
         #endregion
@@ -116,6 +114,34 @@ namespace zFramework.Hotfix.Toolkit
         static void InstallContentPipelineListener() => ContentPipeline.BuildCallbacks.PostScriptsCallbacks += PostScriptsCallbacks;
         public static ReturnCode PostScriptsCallbacks(IBuildParameters parameters, IBuildResults results)
         {
+            StoreHotfixAssemblies(parameters.ScriptOutputFolder);
+            return ReturnCode.Success;
+        }
+
+        #endregion
+
+        #region Force Reload Assemblies
+        public static void ForceLoadAssemblies() 
+        {
+            var buildDir = Application.temporaryCachePath;
+            var files = new DirectoryInfo(buildDir).GetFiles();
+            foreach (var file in files)
+            {
+                FileUtil.DeleteFileOrDirectory(file.FullName);
+            }
+            var target = EditorUserBuildSettings.activeBuildTarget;
+            var group = BuildPipeline.GetBuildTargetGroup(target);
+            ScriptCompilationSettings scs = default;
+            scs.group = group;
+            scs.target = target;
+            PlayerBuildInterface.CompilePlayerScripts(scs, buildDir);
+            StoreHotfixAssemblies(buildDir);
+        }
+        #endregion
+
+        #region Assistance Typs And Functions
+        private static void StoreHotfixAssemblies(string src)
+        {
             var lib_dir = Path.Combine(Application.dataPath, "..", "Library\\ScriptAssemblies");
             foreach (var item in Instance.assemblies)
             {
@@ -126,7 +152,7 @@ namespace zFramework.Hotfix.Toolkit
                     if (item.lastWriteTime < lastWriteTime)
                     {
                         item.lastWriteTime = lastWriteTime;
-                        FileUtil.ReplaceFile(Path.Combine(parameters.ScriptOutputFolder, item.Dll), item.OutputPath);
+                        FileUtil.ReplaceFile(Path.Combine(src, item.Dll), item.OutputPath);
                         item.UpdateInformation();
                     }
                 }
@@ -135,11 +161,8 @@ namespace zFramework.Hotfix.Toolkit
                     Debug.LogError($"{nameof(AssemblyHotfixManager)}: 请先完善 Hotfix Configuration 配置项！");
                 }
             }
-            return ReturnCode.Success;
         }
-        #endregion
 
-        #region Assistance Typs
         [Serializable]
         public class AssemblyData:ISerializationCallbackReceiver
         {
@@ -188,7 +211,7 @@ namespace zFramework.Hotfix.Toolkit
             public string name;
             public bool allowUnsafeCode;
         }
-        #endregion
+        #endregion 
 
     }
 }
