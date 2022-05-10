@@ -79,10 +79,19 @@ namespace zFramework.Hotfix.Toolkit
             {
                 var guids = AssetDatabase.FindAssets($"{nameof(AssemblyHotfixManager)} t:Script");
                 var path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                path = path.Substring(0, path.LastIndexOf('/'));
-                path = Path.Combine(path, $"Data/Assembly Hotfix Manager.asset");
-                instance = AssetDatabase.LoadAssetAtPath<AssemblyHotfixManager>(path);
+                path = path.Substring(0,path.LastIndexOf('/'));
+                path = $"{path}/Data";
+                var file =  $"{path}/Data/{ObjectNames.NicifyVariableName(nameof(AssemblyHotfixManager))}.asset";
+                Debug.Log($"{nameof(AssemblyHotfixManager)}:{path}\n {file}");
+                instance = AssetDatabase.LoadAssetAtPath<AssemblyHotfixManager>(file);
+                if (!instance)
+                {
+                    instance = CreateInstance(nameof(AssemblyHotfixManager)) as AssemblyHotfixManager;
+                    AssetDatabase.CreateAsset(instance,file);
+                    AssetDatabase.Refresh();
+                }
             }
+            Debug.Log($"{nameof(AssemblyHotfixManager)}: instance {instance}");
             return instance;
         }
         #endregion
