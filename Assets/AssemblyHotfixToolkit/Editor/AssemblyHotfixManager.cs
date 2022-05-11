@@ -62,14 +62,16 @@ namespace zFramework.Hotfix.Toolkit
         }
     }
     #endregion
-    public class AssemblyHotfixManager : ScriptableObject, IFilterBuildAssemblies
+    public class AssemblyHotfixManager : ScriptableObject
     {
+        #region Fields
         [Header("热更 DLL 存储的文件展名："), ReadOnly]
         public string fileExtension = ".bytes";
         [Header("热更文件测试模式：")]
         public bool testLoad = false;
         [Header("需要热更的程序集定义文件：")]
         public List<AssemblyData> assemblies;
+        #endregion
 
         #region 单例
         public static AssemblyHotfixManager Instance => LoadConfiguration();
@@ -100,12 +102,15 @@ namespace zFramework.Hotfix.Toolkit
         /// <br>并且不需要将 dll 名称写入到 ScriptingAssemblies.json 中</br>
         /// <br>这个动作仅适用于 mono 编译的 dll，IL2CPP 则不适用</br>
         /// </summary>
-        public int callbackOrder => 0;
-        public string[] OnFilterAssemblies(BuildOptions buildOptions, string[] assemblies)
+        internal class AssemblyFilterHandler : IFilterBuildAssemblies
         {
-            // 将热更dll从打包列表中移除
-            var hotfixAssemblies = Instance.assemblies.Select(v => v.Dll).ToList();
-            return assemblies.Where(ass => hotfixAssemblies.All(dll => !ass.EndsWith(dll, StringComparison.OrdinalIgnoreCase))).ToArray();
+            int IOrderedCallback.callbackOrder => 0;
+            string[] IFilterBuildAssemblies.OnFilterAssemblies(BuildOptions buildOptions, string[] assemblies)
+            {
+                // 将热更dll从打包列表中移除
+                var hotfixAssemblies = Instance.assemblies.Select(v => v.Dll).ToList();
+                return assemblies.Where(ass => hotfixAssemblies.All(dll => !ass.EndsWith(dll, StringComparison.OrdinalIgnoreCase))).ToArray();
+            }
         }
         #endregion
 
@@ -209,7 +214,7 @@ namespace zFramework.Hotfix.Toolkit
             public string name;
             public bool allowUnsafeCode;
         }
-        #endregion 
+        #endregion
 
     }
 }
