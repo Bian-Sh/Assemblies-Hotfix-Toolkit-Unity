@@ -22,14 +22,14 @@ namespace zFramework.Hotfix.Toolkit
             if (backend != ScriptingImplementation.Mono2x)
             {
                 var content = EditorGUIUtility.TrTextContent("此 Assembly 热更方案仅支持 mono scripting backend ！");
-                var rect = GUILayoutUtility.GetRect(content, EditorStyles.helpBox,GUILayout.Height (36) );
+                var rect = GUILayoutUtility.GetRect(content, EditorStyles.helpBox, GUILayout.Height(36));
                 EditorGUI.HelpBox(rect, content.text, MessageType.Warning);
                 var h = EditorGUIUtility.singleLineHeight;
-                rect.y+= rect.height/ 2f-h/2f;
-                rect.x=rect.width-40;
+                rect.y += rect.height / 2f - h / 2f;
+                rect.x = rect.width - 40;
                 rect.width = 50;
                 rect.height = h;
-                if (GUI.Button(rect,new GUIContent("fix", "点击将修改 scriptingbackend 为 il2cpp")))
+                if (GUI.Button(rect, new GUIContent("fix", "点击将修改 scriptingbackend 为 il2cpp")))
                 {
                     PlayerSettings.SetScriptingBackend(targetgroup, ScriptingImplementation.Mono2x);
                 }
@@ -62,14 +62,14 @@ namespace zFramework.Hotfix.Toolkit
         }
     }
     #endregion
-    public class AssemblyHotfixManager : ScriptableObject,IFilterBuildAssemblies
+    public class AssemblyHotfixManager : ScriptableObject, IFilterBuildAssemblies
     {
         [Header("热更 DLL 存储的文件展名："), ReadOnly]
         public string fileExtension = ".bytes";
         [Header("热更文件测试模式：")]
         public bool testLoad = false;
         [Header("需要热更的程序集定义文件：")]
-        public List<AssemblyData> assemblies ;
+        public List<AssemblyData> assemblies;
 
         #region 单例
         public static AssemblyHotfixManager Instance => LoadConfiguration();
@@ -80,13 +80,13 @@ namespace zFramework.Hotfix.Toolkit
             {
                 var guids = AssetDatabase.FindAssets($"{nameof(AssemblyHotfixManager)} t:Script");
                 var path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                path = path.Substring(0,path.LastIndexOf("/Editor/"));
-                var file =  $"{path}/Data/{ObjectNames.NicifyVariableName(nameof(AssemblyHotfixManager))}.asset";
+                path = path.Substring(0, path.LastIndexOf("/Editor/"));
+                var file = $"{path}/Data/{ObjectNames.NicifyVariableName(nameof(AssemblyHotfixManager))}.asset";
                 instance = AssetDatabase.LoadAssetAtPath<AssemblyHotfixManager>(file);
                 if (!instance)
                 {
                     instance = CreateInstance(nameof(AssemblyHotfixManager)) as AssemblyHotfixManager;
-                    AssetDatabase.CreateAsset(instance,file);
+                    AssetDatabase.CreateAsset(instance, file);
                     AssetDatabase.Refresh();
                 }
             }
@@ -112,16 +112,12 @@ namespace zFramework.Hotfix.Toolkit
         #region Addressable Post Script Build Process
         [InitializeOnLoadMethod]
         static void InstallContentPipelineListener() => ContentPipeline.BuildCallbacks.PostScriptsCallbacks += PostScriptsCallbacks;
-        public static ReturnCode PostScriptsCallbacks(IBuildParameters parameters, IBuildResults results)
-        {
-            StoreHotfixAssemblies(parameters.ScriptOutputFolder);
-            return ReturnCode.Success;
-        }
+        public static ReturnCode PostScriptsCallbacks(IBuildParameters parameters, IBuildResults results) => StoreHotfixAssemblies(parameters.ScriptOutputFolder);
 
         #endregion
 
         #region Force Reload Assemblies
-        public static void ForceLoadAssemblies() 
+        public static void ForceLoadAssemblies()
         {
             var buildDir = Application.temporaryCachePath;
             var files = new DirectoryInfo(buildDir).GetFiles();
@@ -140,7 +136,7 @@ namespace zFramework.Hotfix.Toolkit
         #endregion
 
         #region Assistance Typs And Functions
-        private static void StoreHotfixAssemblies(string src)
+        private static ReturnCode StoreHotfixAssemblies(string src)
         {
             var lib_dir = Path.Combine(Application.dataPath, "..", "Library\\ScriptAssemblies");
             foreach (var item in Instance.assemblies)
@@ -159,12 +155,14 @@ namespace zFramework.Hotfix.Toolkit
                 else
                 {
                     Debug.LogError($"{nameof(AssemblyHotfixManager)}: 请先完善 Hotfix Configuration 配置项！");
+                    return ReturnCode.Exception;
                 }
             }
+            return ReturnCode.Exception;
         }
 
         [Serializable]
-        public class AssemblyData:ISerializationCallbackReceiver
+        public class AssemblyData : ISerializationCallbackReceiver
         {
             [Header("热更的程序集")]
             public AssemblyDefinitionAsset assembly;
@@ -197,7 +195,7 @@ namespace zFramework.Hotfix.Toolkit
 
             public void OnAfterDeserialize()
             {
-                if (null==assembly)
+                if (null == assembly)
                 {
                     hotfixAssembly = null;
                     lastUpdateTime = string.Empty;
