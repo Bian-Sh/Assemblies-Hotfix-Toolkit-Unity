@@ -163,7 +163,7 @@ namespace zFramework.Hotfix.Toolkit
                     return ReturnCode.Exception;
                 }
             }
-            return ReturnCode.Exception;
+            return ReturnCode.Success;
         }
 
         [Serializable]
