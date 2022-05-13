@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define UNITY_ANDROID
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,31 +9,42 @@ using UnityEditor.Build;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEditor.Build.Player;
+using UnityEditor.Build.Reporting;
 using UnityEditorInternal;
 using UnityEngine;
 namespace zFramework.Hotfix.Toolkit
 {
-    #region Inspector Draw
+#region Inspector Draw
     [CustomEditor(typeof(AssemblyHotfixManager))]
     public class AssemblyHotfixManagerEditor : Editor
     {
+        string HuatuoVersionPath = default;
+        string url = @"https://github.com/focus-creative-games/huatuo_upm";
+        GUIStyle style;
+        private void OnEnable()
+        {
+            HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
+        }
         public override void OnInspectorGUI()
         {
             var targetgroup = BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
             var backend = PlayerSettings.GetScriptingBackend(targetgroup);
-            if (backend != ScriptingImplementation.Mono2x)
+            var is_Huatuo_Installed = File.Exists(HuatuoVersionPath);
+            if (backend != ScriptingImplementation.Mono2x && !is_Huatuo_Installed)
             {
-                var content = EditorGUIUtility.TrTextContent("此 Assembly 热更方案仅支持 mono scripting backend ！");
-                var rect = GUILayoutUtility.GetRect(content, EditorStyles.helpBox, GUILayout.Height(36));
-                EditorGUI.HelpBox(rect, content.text, MessageType.Warning);
-                var h = EditorGUIUtility.singleLineHeight;
-                rect.y += rect.height / 2f - h / 2f;
-                rect.x = rect.width - 40;
-                rect.width = 50;
-                rect.height = h;
-                if (GUI.Button(rect, new GUIContent("fix", "点击将修改 scriptingbackend 为 il2cpp")))
+                if (style == null)
                 {
-                    PlayerSettings.SetScriptingBackend(targetgroup, ScriptingImplementation.Mono2x);
+                    style = new GUIStyle(EditorStyles.helpBox);
+                    style.wordWrap = true;
+                    style.richText = true;
+                }
+                var label = EditorGUIUtility.TrTextContentWithIcon($"请安装 <a url=\"{url}\"> Huatuo</a> 以支持代码后端为 IL2CPP 的程序集热更！", MessageType.Warning);
+                EditorGUILayout.LabelField(label, style);
+                var rect = GUILayoutUtility.GetLastRect();
+                EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
+                if (GUI.Button(rect, new GUIContent("", "点击访问 Huatuo 安装器托管仓库"), GUIStyle.none))
+                {
+                    Application.OpenURL(url);
                 }
             }
             else
@@ -61,19 +74,19 @@ namespace zFramework.Hotfix.Toolkit
             }
         }
     }
-    #endregion
+#endregion
     public class AssemblyHotfixManager : ScriptableObject
     {
-        #region Fields
+#region Fields
         [Header("热更 DLL 存储的文件展名："), ReadOnly]
         public string fileExtension = ".bytes";
         [Header("热更文件测试模式：")]
         public bool testLoad = false;
         [Header("需要热更的程序集定义文件：")]
         public List<AssemblyData> assemblies;
-        #endregion
+#endregion
 
-        #region 单例
+#region 单例
         public static AssemblyHotfixManager Instance => LoadConfiguration();
         static AssemblyHotfixManager instance;
         private static AssemblyHotfixManager LoadConfiguration()
@@ -94,34 +107,90 @@ namespace zFramework.Hotfix.Toolkit
             }
             return instance;
         }
-        #endregion
+#endregion
 
-        #region Filter Assembly files when build application
+
+
+
+#region Filter Assembly files when build application
         /// <summary>
         /// 所有热更新 dll在 Build 时需要剥离出来
-        /// <br>并且不需要将 dll 名称写入到 ScriptingAssemblies.json 中</br>
-        /// <br>这个动作仅适用于 mono 编译的 dll，IL2CPP 则不适用</br>
         /// </summary>
         internal class AssemblyFilterHandler : IFilterBuildAssemblies
         {
             int IOrderedCallback.callbackOrder => 0;
             string[] IFilterBuildAssemblies.OnFilterAssemblies(BuildOptions buildOptions, string[] assemblies)
             {
-                // 将热更dll从打包列表中移除
                 var hotfixAssemblies = Instance.assemblies.Select(v => v.Dll).ToList();
                 return assemblies.Where(ass => hotfixAssemblies.All(dll => !ass.EndsWith(dll, StringComparison.OrdinalIgnoreCase))).ToArray();
             }
         }
-        #endregion
+#endregion
 
-        #region Addressable Post Script Build Process
+#region Post Build Handler for IL2cpp
+        internal class PostBuildHandler :
+#if UNITY_ANDROID
+         UnityEditor.Android.IPostGenerateGradleAndroidProject
+#else
+         IPostprocessBuildWithReport
+#endif
+        {
+            public int callbackOrder => 0;
+#if UNITY_ANDROID
+            public void OnPostGenerateGradleAndroidProject(string path) => AddBackHotFixAssembliesToJson(path);
+#else
+            public void OnPostprocessBuild(BuildReport report) => AddBackHotFixAssembliesToJson(report.summary.outputPath);
+#endif
+            private void AddBackHotFixAssembliesToJson(string path)
+            {
+                /*
+                  ScriptingAssemblies.json 文件中记录了所有的dll名称，此列表在游戏启动时自动加载，
+                  不在此列表中的dll在资源反序列化时无法被找到其类型
+                  因此 OnFilterAssemblies 中移除的条目需要再加回来
+                  上面描述的是：scripting backend = il2cpp 的情况，mono 无须添加回来
+                 */
+                string[] jsonFiles = Directory.GetFiles(Path.GetDirectoryName(path), "ScriptingAssemblies.json", SearchOption.AllDirectories);
+                if (jsonFiles.Length == 0)
+                {
+                    Debug.LogError("can not find file ScriptingAssemblies.json");
+                    return;
+                }
+
+                foreach (string file in jsonFiles)
+                {
+                    string content = File.ReadAllText(file);
+                    ScriptingAssemblies scriptingAssemblies = JsonUtility.FromJson<ScriptingAssemblies>(content);
+                    var assemblies = Instance.assemblies.Select(v => v.Dll);
+                    foreach (string name in assemblies)
+                    {
+                        if (!scriptingAssemblies.names.Contains(name))
+                        {
+                            scriptingAssemblies.names.Add(name);
+                            scriptingAssemblies.types.Add(16); // user dll type
+                        }
+                    }
+                    content = JsonUtility.ToJson(scriptingAssemblies);
+                    File.WriteAllText(file, content);
+                }
+            }
+            [Serializable]
+            public class ScriptingAssemblies
+            {
+                public List<string> names;
+                public List<int> types;
+            }
+        }
+#endregion
+
+
+#region Addressable Post Script Build Process
         [InitializeOnLoadMethod]
         static void InstallContentPipelineListener() => ContentPipeline.BuildCallbacks.PostScriptsCallbacks += PostScriptsCallbacks;
         public static ReturnCode PostScriptsCallbacks(IBuildParameters parameters, IBuildResults results) => StoreHotfixAssemblies(parameters.ScriptOutputFolder);
 
-        #endregion
+#endregion
 
-        #region Force Reload Assemblies
+#region Force Reload Assemblies
         public static void ForceLoadAssemblies()
         {
             var buildDir = Application.temporaryCachePath;
@@ -138,9 +207,9 @@ namespace zFramework.Hotfix.Toolkit
             PlayerBuildInterface.CompilePlayerScripts(scs, buildDir);
             StoreHotfixAssemblies(buildDir);
         }
-        #endregion
+#endregion
 
-        #region Assistance Typs And Functions
+#region Assistance Typs And Functions
         private static ReturnCode StoreHotfixAssemblies(string src)
         {
             var lib_dir = Path.Combine(Application.dataPath, "..", "Library\\ScriptAssemblies");
@@ -214,7 +283,6 @@ namespace zFramework.Hotfix.Toolkit
             public string name;
             public bool allowUnsafeCode;
         }
-        #endregion
-
+#endregion
     }
 }
