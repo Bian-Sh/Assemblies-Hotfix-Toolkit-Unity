@@ -79,7 +79,7 @@ namespace zFramework.Hotfix.Toolkit
         #region Fields
         [Header("热更 DLL 存储的文件展名："), ReadOnly]
         public string fileExtension = ".bytes";
-        [Header("热更文件测试模式：")]
+        [Header("热更文件测试模式："), ReadOnly, Tooltip("瞅了一眼，还是可以实现的，但暂时不支持。")]
         public bool testLoad = false;
         [Header("需要热更的程序集定义文件：")]
         public List<AssemblyData> assemblies;
