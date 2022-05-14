@@ -1,5 +1,4 @@
 ﻿//#define UNITY_ANDROID
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +13,7 @@ using UnityEditorInternal;
 using UnityEngine;
 namespace zFramework.Hotfix.Toolkit
 {
-#region Inspector Draw
+    #region Inspector Draw
     [CustomEditor(typeof(AssemblyHotfixManager))]
     public class AssemblyHotfixManagerEditor : Editor
     {
@@ -74,19 +73,19 @@ namespace zFramework.Hotfix.Toolkit
             }
         }
     }
-#endregion
+    #endregion
     public class AssemblyHotfixManager : ScriptableObject
     {
-#region Fields
+        #region Fields
         [Header("热更 DLL 存储的文件展名："), ReadOnly]
         public string fileExtension = ".bytes";
         [Header("热更文件测试模式：")]
         public bool testLoad = false;
         [Header("需要热更的程序集定义文件：")]
         public List<AssemblyData> assemblies;
-#endregion
+        #endregion
 
-#region 单例
+        #region 单例
         public static AssemblyHotfixManager Instance => LoadConfiguration();
         static AssemblyHotfixManager instance;
         private static AssemblyHotfixManager LoadConfiguration()
@@ -107,12 +106,9 @@ namespace zFramework.Hotfix.Toolkit
             }
             return instance;
         }
-#endregion
+        #endregion
 
-
-
-
-#region Filter Assembly files when build application
+        #region Filter Assembly files when build application
         /// <summary>
         /// 所有热更新 dll在 Build 时需要剥离出来
         /// </summary>
@@ -125,9 +121,9 @@ namespace zFramework.Hotfix.Toolkit
                 return assemblies.Where(ass => hotfixAssemblies.All(dll => !ass.EndsWith(dll, StringComparison.OrdinalIgnoreCase))).ToArray();
             }
         }
-#endregion
+        #endregion
 
-#region Post Build Handler for IL2cpp
+        #region Post Build Handler for IL2cpp
         internal class PostBuildHandler :
 #if UNITY_ANDROID
          UnityEditor.Android.IPostGenerateGradleAndroidProject
@@ -144,33 +140,28 @@ namespace zFramework.Hotfix.Toolkit
             private void AddBackHotFixAssembliesToJson(string path)
             {
                 /*
-                  ScriptingAssemblies.json 文件中记录了所有的dll名称，此列表在游戏启动时自动加载，
-                  不在此列表中的dll在资源反序列化时无法被找到其类型
-                  因此 OnFilterAssemblies 中移除的条目需要再加回来
-                  上面描述的是：scripting backend = il2cpp 的情况，mono 无须添加回来
+                  il2cpp: ScriptingAssemblies.json 文件中记录了所有的dll名称，此列表在游戏启动时自动加载，
+                  不在此列表中的dll在资源反序列化时无法被找到其类型,因此 OnFilterAssemblies 中移除的条目需要再加回来
+                  mono: 无须添加回来
                  */
-                string[] jsonFiles = Directory.GetFiles(Path.GetDirectoryName(path), "ScriptingAssemblies.json", SearchOption.AllDirectories);
-                if (jsonFiles.Length == 0)
+                var targetgroup = BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
+                var backend = PlayerSettings.GetScriptingBackend(targetgroup);
+                if (backend != ScriptingImplementation.Mono2x)
                 {
-                    Debug.LogError("can not find file ScriptingAssemblies.json");
-                    return;
-                }
-
-                foreach (string file in jsonFiles)
-                {
-                    string content = File.ReadAllText(file);
-                    ScriptingAssemblies scriptingAssemblies = JsonUtility.FromJson<ScriptingAssemblies>(content);
-                    var assemblies = Instance.assemblies.Select(v => v.Dll);
-                    foreach (string name in assemblies)
+                    string[] files = Directory.GetFiles(Path.GetDirectoryName(path), "ScriptingAssemblies.json", SearchOption.AllDirectories);
+                    foreach (string file in files)
                     {
-                        if (!scriptingAssemblies.names.Contains(name))
+                        string content = File.ReadAllText(file);
+                        var data = JsonUtility.FromJson<ScriptingAssemblies>(content);
+                        var assemblies = Instance.assemblies.Select(v => v.Dll);
+                        foreach (string name in assemblies)
                         {
-                            scriptingAssemblies.names.Add(name);
-                            scriptingAssemblies.types.Add(16); // user dll type
+                                data.names.Add(name);
+                                data.types.Add(16); // user dll type
                         }
+                        content = JsonUtility.ToJson(data);
+                        File.WriteAllText(file, content);
                     }
-                    content = JsonUtility.ToJson(scriptingAssemblies);
-                    File.WriteAllText(file, content);
                 }
             }
             [Serializable]
@@ -180,17 +171,16 @@ namespace zFramework.Hotfix.Toolkit
                 public List<int> types;
             }
         }
-#endregion
+        #endregion
 
-
-#region Addressable Post Script Build Process
+        #region Addressable Post Script Build Process
         [InitializeOnLoadMethod]
         static void InstallContentPipelineListener() => ContentPipeline.BuildCallbacks.PostScriptsCallbacks += PostScriptsCallbacks;
         public static ReturnCode PostScriptsCallbacks(IBuildParameters parameters, IBuildResults results) => StoreHotfixAssemblies(parameters.ScriptOutputFolder);
 
-#endregion
+        #endregion
 
-#region Force Reload Assemblies
+        #region Force Reload Assemblies
         public static void ForceLoadAssemblies()
         {
             var buildDir = Application.temporaryCachePath;
@@ -207,9 +197,9 @@ namespace zFramework.Hotfix.Toolkit
             PlayerBuildInterface.CompilePlayerScripts(scs, buildDir);
             StoreHotfixAssemblies(buildDir);
         }
-#endregion
+        #endregion
 
-#region Assistance Typs And Functions
+        #region Assistance Typs And Functions
         private static ReturnCode StoreHotfixAssemblies(string src)
         {
             var lib_dir = Path.Combine(Application.dataPath, "..", "Library\\ScriptAssemblies");
@@ -283,6 +273,6 @@ namespace zFramework.Hotfix.Toolkit
             public string name;
             public bool allowUnsafeCode;
         }
-#endregion
+        #endregion
     }
 }
