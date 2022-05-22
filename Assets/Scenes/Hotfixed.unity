@@ -1767,6 +1767,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd8f5a3429d59224e9f2276f1cb114c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  data:
+    name: Bian
+    age: 34
+    button: {fileID: 2072956639}
+  serializable:
+    somestring: pppp
+    someint: 9999
+    somebt: {fileID: 2072956639}
   button: {fileID: 1147632595}
   close_button: {fileID: 2072956639}
   dropdown: {fileID: 1967780416}
@@ -2083,7 +2091,7 @@ GameObject:
   - component: {fileID: 2072956640}
   - component: {fileID: 2072956639}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Button-Test
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

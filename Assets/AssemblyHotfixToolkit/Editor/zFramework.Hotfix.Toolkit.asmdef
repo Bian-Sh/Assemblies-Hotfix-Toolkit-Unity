@@ -5,7 +5,8 @@
         "Unity.Addressables.Editor",
         "Unity.Addressables",
         "Unity.ScriptableBuildPipeline.Editor",
-        "Unity.ScriptableBuildPipeline"
+        "Unity.ScriptableBuildPipeline",
+        "zFramework.Hotfix.Toolkit.Runtime"
     ],
     "includePlatforms": [
         "Editor"

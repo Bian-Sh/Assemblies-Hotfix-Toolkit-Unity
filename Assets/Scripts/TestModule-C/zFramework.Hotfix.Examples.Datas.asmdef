@@ -1,16 +1,15 @@
 {
-    "name": "zFramework.Hotfix.Examples",
-    "rootNamespace": "zFramework",
+    "name": "zFramework.Hotfix.Examples.Datas",
+    "rootNamespace": "",
     "references": [
-        "GUID:0874c2c39a32f31428a64c4f97347970",
-        "GUID:5b79e92f685c13d4586711d80f25116f"
+        "GUID:a14bc4a28cab3bf499f21094f281c116"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": false,
+    "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

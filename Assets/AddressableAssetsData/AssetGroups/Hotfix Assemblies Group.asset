@@ -10,20 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Default Local Group
+  m_Name: Hotfix Assemblies Group
   m_EditorClassIdentifier: 
-  m_GroupName: Default Local Group
+  m_GroupName: Hotfix Assemblies Group
   m_Data:
     m_SerializedData: []
-  m_GUID: 72ec21a2fa2dc32428fe2413c0d45fbb
+  m_GUID: 22a24bb5309144f49b04c54c3e2dc492
   m_SerializeEntries:
-  - m_GUID: 93480ec77789fb84e897488ce5a9a011
-    m_Address: Hotfixed.unity
+  - m_GUID: b2613a85f2af5c24e91334be2ca82c72
+    m_Address: zFramework.Hotfix.Examples.bytes
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cce56d6a771a5bd499f7253d3de25e1c
-    m_Address: zframework.hotfixed.example.bytes
+  - m_GUID: 539dd83034d111b47b7e69ff0e865eb1
+    m_Address: zFramework.Hotfix.Demo.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1785265277df364196604db5eed2902
+    m_Address: Hotfix Assemblies Data.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -31,5 +36,5 @@ MonoBehaviour:
   m_Settings: {fileID: 11400000, guid: 7d1985aeef47d8446ad3bc07ab68c8e5, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: bb826ad6e66d1f24cafa8c9e77eba5a0, type: 2}
-    - {fileID: 11400000, guid: 3ddea7be2bbe0874d990656d9396e03d, type: 2}
+    - {fileID: 11400000, guid: edcb8139a7ea10f49bd36ed413e6e844, type: 2}
+    - {fileID: 11400000, guid: 263128b1a6c1566479328e4d48874a71, type: 2}

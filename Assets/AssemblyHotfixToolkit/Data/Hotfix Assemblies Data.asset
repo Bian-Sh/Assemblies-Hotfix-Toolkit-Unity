@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bb9b8c0377e59f49b3d11cdbc1dd3e7, type: 3}
+  m_Name: Hotfix Assemblies Data
+  m_EditorClassIdentifier: 
+  assemblies:
+  - m_AssetGUID: cce56d6a771a5bd499f7253d3de25e1c
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 1
+  - m_AssetGUID: 539dd83034d111b47b7e69ff0e865eb1
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 1
+  - m_AssetGUID: b2613a85f2af5c24e91334be2ca82c72
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 1

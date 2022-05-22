@@ -682,9 +682,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 941bb032a99cdd847b6282da3659d4d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  assemblyAssetKey: zFramework.Hotfix.Examples.bytes
-  assemblyAssetKey_ref: zFramework.Hotfix.Demo.bytes
+  assembliesData: {fileID: 11400000, guid: a1785265277df364196604db5eed2902, type: 2}
   button: {fileID: 1325342301}
+  testLoad: 0
 --- !u!1 &1287991331
 GameObject:
   m_ObjectHideFlags: 0
