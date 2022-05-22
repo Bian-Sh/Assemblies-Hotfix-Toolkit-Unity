@@ -27,6 +27,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 491f265c749341741ad8cdc15f1deed6
+    m_Address: Assets/Scripts/TestModule-C/New Some Scriptable Object.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 7d1985aeef47d8446ad3bc07ab68c8e5, type: 2}
   m_SchemaSet:

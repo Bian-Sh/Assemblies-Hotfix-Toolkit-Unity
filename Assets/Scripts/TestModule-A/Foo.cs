@@ -8,12 +8,13 @@ namespace zFramework.Hotfix.Examples
     {
         public string name;
         public int age;
-        public Button button;
+        public Button button; 
     }
     public class Foo : MonoBehaviour
     {
         public SomeData data; //这种可序列化的类如果本身就热更，那么此处将会为空，所以类似的用法，清使用 ScriptableObject 代替
         public SomeSerializable  serializable; // 同上，如果你不行，可以把第 23 行解除注释后测试哈
+        public SomeScriptableObject scriptableObject;
         public Button button;
         public Button close_button;
         public Dropdown dropdown;
@@ -22,7 +23,9 @@ namespace zFramework.Hotfix.Examples
         {
             //Debug.Log($"{nameof(Foo)}:  SomeSerializable-data {serializable.somestring}");
             //Debug.Log($"{nameof(Foo)}:  {data.name}  - {data.age} - {data.button.name}");
-            
+            Debug.Log($"{nameof(Foo)}: 测试 so");
+            Debug.Log($"{nameof(Foo)}:  {scriptableObject.name}-{scriptableObject.somestring}  - {scriptableObject.age}");
+
             button.onClick.AddListener(uuu);
             close_button.onClick.AddListener(OnCloseBTClicked);
             dropdown.onValueChanged.AddListener(OnDropdownValuechanged);
