@@ -10,13 +10,14 @@
         static void OpenWindow()
         {
             var window = GetWindow<HotfixedConfigWindow>(true, "Dll 热更处理配置工具", true);
-            window.editor = Editor.CreateEditor(Instance);
+            
+            window.editor = Editor.CreateEditor(AssemblyHotfixManager.Instance);
             window.minSize = new Vector2(360, 300);
         }
         Vector2 pos;
         private void OnGUI()
         {
-            Editor.CreateCachedEditor(Instance, typeof(AssemblyHotfixManagerEditor), ref editor);
+            Editor.CreateCachedEditor(AssemblyHotfixManager.Instance, typeof(AssemblyHotfixManagerEditor), ref editor);
             using (var scroll = new EditorGUILayout.ScrollViewScope(pos))
             {
                 pos = scroll.scrollPosition;

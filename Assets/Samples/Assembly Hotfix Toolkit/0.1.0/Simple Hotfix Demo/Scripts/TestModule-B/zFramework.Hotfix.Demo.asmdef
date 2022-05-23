@@ -1,0 +1,14 @@
+{
+    "name": "zFramework.Hotfix.Demo",
+    "rootNamespace": "zFramework.Hotfix",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

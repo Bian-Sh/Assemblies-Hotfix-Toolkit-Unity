@@ -1,10 +1,13 @@
 {
   "dependencies": {
-    "com.bshsf.hotfix": {
-      "version": "file:com.bshsf.hotfix",
+    "com.bshsf.hotfix-toolkit": {
+      "version": "file:com.bshsf.hotfix-toolkit",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.scriptablebuildpipeline": "1.19.6",
+        "com.unity.addressables": "1.20.0"
+      }
     },
     "com.focus-creative-games.huatuo": {
       "version": "0.1.3",

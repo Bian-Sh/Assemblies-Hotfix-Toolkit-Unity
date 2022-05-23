@@ -4,7 +4,6 @@ using UnityEditorInternal;
 using UnityEngine;
 namespace zFramework.Hotfix.Toolkit
 {
-    using static AssemblyHotfixManager;
     [Serializable]
     public class AssemblyData : ISerializationCallbackReceiver
     {
@@ -25,7 +24,7 @@ namespace zFramework.Hotfix.Toolkit
         SimplifiedAssemblyData Data => data ?? (data = JsonUtility.FromJson<SimplifiedAssemblyData>(assembly.text));
         [HideInInspector]
         public long lastWriteTime;
-        public string OutputPath => $"{AssetDatabase.GetAssetPath(folder)}/{Data.name}{Instance.fileExtension}";
+        public string OutputPath => $"{AssetDatabase.GetAssetPath(folder)}/{Data.name}{AssemblyHotfixManager.Instance.fileExtension}";
         public string Dll => $"{Data.name}.dll";
         public bool IsValid => assembly && folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
         public bool AllowUnsafeCode => Data.allowUnsafeCode;
@@ -34,7 +33,7 @@ namespace zFramework.Hotfix.Toolkit
             AssetDatabase.Refresh();
             hotfixAssembly = AssetDatabase.LoadMainAssetAtPath(OutputPath) as TextAsset;
             lastUpdateTime = new DateTime(lastWriteTime).ToString("yyyy-MM-dd HH:mm:ss");
-            EditorUtility.SetDirty(Instance);
+            EditorUtility.SetDirty(AssemblyHotfixManager.Instance);
         }
         public void OnBeforeSerialize() { }
 

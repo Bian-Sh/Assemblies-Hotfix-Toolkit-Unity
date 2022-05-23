@@ -1,9 +1,28 @@
 {
-  "name": "com.bshsf.hotfix",
-  "author": "雨落随风",
+  "name": "com.bshsf.hotfix-toolkit",
+  "author": "\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd",
   "displayName": "Assembly Hotfix Toolkit",
   "version": "0.1.0",
   "unity": "2020.3",
   "description": "\u903b\u8f91\u70ed\u66f4\u5de5\u5177\n\n\u25aa What the package does \n\u5728 Adressable \u6253 ab \u65f6\u81ea\u52a8\u8f6c\u5b58\u70ed\u66f4 dll\uff0c\u5728 App Build \u65f6\uff0c\u81ea\u52a8\u5904\u7406\u8fc7\u6ee4\u70ed\u66f4 dll\uff0c\u652f\u6301 mono + il2cpp \u4ee3\u7801\u540e\u7aef\u7684\u65e0\u611f\u77e5\u903b\u8f91\u70ed\u66f4\u65b0\nIL2CPP \u7684\u4ee3\u7801\u70ed\u66f4\u7531 Huatuo \u63d0\u4f9b\u6280\u672f\u652f\u6301 \n\n\u25aa How it can benefit the user \n\u5728 Addressable \u652f\u6301\u4e0b\u5b9e\u73b0\u65e0\u611f\u77e5\u7684\u4ee3\u7801\u70ed\u66f4\n\u7528\u6237\u53ea\u9700\u8981\u544a\u77e5\u672c\u5de5\u5177\u5e0c\u671b\u70ed\u66f4\u7684\u7a0b\u5e8f\u96c6\u5373\u53ef\uff0c\u5176\u4ed6\u5747\u7531\u672c\u5de5\u5177+Addressable+huatuo\u5904\u7406",
-  "type": "tool"
+  "keywords": [
+    "addressable",
+    "bundle",
+    "bundles",
+    "hotfix",
+    "assembly",
+    "assetbundles"
+  ],
+  "dependencies": {
+    "com.unity.scriptablebuildpipeline": "1.19.6",
+    "com.unity.addressables": "1.20.0"
+  },
+  "samples": [
+    {
+      "displayName": "Simple Hotfix Demo",
+      "description": "非常简易的逻辑热更新示例，赶快来体验什么叫无感知逻辑热更吧~",
+      "path": "Samples~/Example"
+    }
+  ],
+    "type":"tool"
 }

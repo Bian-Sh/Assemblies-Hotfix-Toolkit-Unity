@@ -16,7 +16,12 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 72ec21a2fa2dc32428fe2413c0d45fbb
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 93480ec77789fb84e897488ce5a9a011
+    m_Address: Assets/Samples/Assembly Hotfix Toolkit/0.1.0/Simple Hotfix Demo/Scenes/Hotfixed.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 7d1985aeef47d8446ad3bc07ab68c8e5, type: 2}
   m_SchemaSet:
