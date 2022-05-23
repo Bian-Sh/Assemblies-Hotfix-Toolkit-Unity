@@ -17,16 +17,6 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 22a24bb5309144f49b04c54c3e2dc492
   m_SerializeEntries:
-  - m_GUID: b2613a85f2af5c24e91334be2ca82c72
-    m_Address: zFramework.Hotfix.Examples.bytes
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 539dd83034d111b47b7e69ff0e865eb1
-    m_Address: zFramework.Hotfix.Demo.bytes
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1785265277df364196604db5eed2902
     m_Address: Hotfix Assemblies Data.asset
     m_ReadOnly: 0

@@ -16,22 +16,7 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 72ec21a2fa2dc32428fe2413c0d45fbb
-  m_SerializeEntries:
-  - m_GUID: 93480ec77789fb84e897488ce5a9a011
-    m_Address: Hotfixed.unity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cce56d6a771a5bd499f7253d3de25e1c
-    m_Address: zframework.hotfixed.example.bytes
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 491f265c749341741ad8cdc15f1deed6
-    m_Address: Assets/Scripts/TestModule-C/New Some Scriptable Object.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 7d1985aeef47d8446ad3bc07ab68c8e5, type: 2}
   m_SchemaSet:

@@ -1,0 +1,5 @@
+{
+	"displayName":"Simple Hotfix Demo",
+	"description": "简易热更示例",
+	"createSeparatePackage": false
+}
