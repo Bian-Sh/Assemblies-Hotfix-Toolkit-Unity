@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Reflection;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.UI;
 using zFramework.Hotfix.Toolkit;
@@ -16,7 +13,7 @@ namespace zFramework.Hotfix.Examples
         public AssetReference hotfixScene;
         public Button button;
 #if UNITY_EDITOR
-        [Header("加载热更逻辑："),Tooltip("勾选则从 ab 中加载程序集！")]
+        [Header("加载热更逻辑："), Tooltip("勾选则从 ab 中加载程序集！")]
         public bool testLoad = false;
 #endif
         static SceneInstance sceneInstance;
@@ -33,7 +30,6 @@ namespace zFramework.Hotfix.Examples
                 sceneInstance.ActivateAsync();
             }
         }
-
         IEnumerator OnLoad()
         {
             button.interactable = false;
@@ -44,7 +40,7 @@ namespace zFramework.Hotfix.Examples
                 // 需要先加载依赖,按一定的顺序加载
                 yield return hotfixAssemblies.LoadAssemblyAsync();
             }
-            var handler =hotfixScene.LoadSceneAsync( activateOnLoad: false);
+            var handler = hotfixScene.LoadSceneAsync(activateOnLoad: false);
             yield return handler;
             sceneInstance = handler.Result;
             button.interactable = true;
@@ -57,6 +53,4 @@ namespace zFramework.Hotfix.Examples
             }
         }
     }
-
-
 }

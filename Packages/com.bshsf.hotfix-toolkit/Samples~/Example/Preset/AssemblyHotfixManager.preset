@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!181963792 &2655988077585873504
+Preset:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: AssemblyHotfixManager
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 484b3401b0beb19438867534a6f34e9d, type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileExtension
+    value: .bytes
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.size
+    value: 3
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[0].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: 5b79e92f685c13d4586711d80f25116f, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[0].folder
+    value: 
+    objectReference: {fileID: 102900000, guid: 54bdeedbd6ff33b4f85ded4d73744004, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[0].hotfixAssembly
+    value: 
+    objectReference: {fileID: 4900000, guid: cce56d6a771a5bd499f7253d3de25e1c, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[0].lastUpdateTime
+    value: 2022-05-24 00:53:55
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[0].lastWriteTime
+    value: 637889504355520584
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[1].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: 0874c2c39a32f31428a64c4f97347970, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[1].folder
+    value: 
+    objectReference: {fileID: 102900000, guid: 54bdeedbd6ff33b4f85ded4d73744004, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[1].hotfixAssembly
+    value: 
+    objectReference: {fileID: 4900000, guid: 539dd83034d111b47b7e69ff0e865eb1, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[1].lastUpdateTime
+    value: 2022-05-24 00:43:11
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[1].lastWriteTime
+    value: 637889497918426903
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[2].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: 7f26512e7c8a67946bbfb4e8c8378863, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[2].folder
+    value: 
+    objectReference: {fileID: 102900000, guid: 54bdeedbd6ff33b4f85ded4d73744004, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[2].hotfixAssembly
+    value: 
+    objectReference: {fileID: 4900000, guid: b2613a85f2af5c24e91334be2ca82c72, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[2].lastUpdateTime
+    value: 2022-05-24 00:43:12
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[2].lastWriteTime
+    value: 637889497925196895
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []

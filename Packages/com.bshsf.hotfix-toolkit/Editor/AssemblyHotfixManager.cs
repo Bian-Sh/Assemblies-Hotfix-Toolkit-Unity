@@ -71,8 +71,8 @@ namespace zFramework.Hotfix.Toolkit
                         var assemblies = Instance.assemblies.Select(v => v.Dll);
                         foreach (string name in assemblies)
                         {
-                                data.names.Add(name);
-                                data.types.Add(16); // user dll type
+                            data.names.Add(name);
+                            data.types.Add(16); // user dll type
                         }
                         content = JsonUtility.ToJson(data);
                         File.WriteAllText(file, content);
@@ -123,13 +123,8 @@ namespace zFramework.Hotfix.Toolkit
                 if (item.IsValid)    // 如果配置正确则尝试转存储文件
                 {
                     var file = new FileInfo(Path.Combine(lib_dir, item.Dll));
-                    var lastWriteTime = file.LastWriteTime.Ticks;
-                    if (item.lastWriteTime < lastWriteTime)
-                    {
-                        item.lastWriteTime = lastWriteTime;
-                        FileUtil.ReplaceFile(Path.Combine(src, item.Dll), item.OutputPath);
-                        item.UpdateInformation();
-                    }
+                    FileUtil.ReplaceFile(Path.Combine(src, item.Dll), item.OutputPath);
+                    UpdateInformation(item);
                 }
                 else
                 {
@@ -138,6 +133,23 @@ namespace zFramework.Hotfix.Toolkit
                 }
             }
             return ReturnCode.Success;
+        }
+
+        private static void UpdateInformation(AssemblyData item)
+        {
+            AssetDatabase.Refresh();
+            // todo :直接转为 可寻址对象
+            var asset = AssetDatabase.LoadMainAssetAtPath(item.OutputPath) as TextAsset;
+            if ( asset!= item.hotfixAssembly)
+            {
+                item.hotfixAssembly = asset;
+                Debug.Log($"{nameof(AssemblyHotfixManager)}: asset 替换成功");
+            }
+            else
+            {
+                Debug.Log($"{nameof(AssemblyHotfixManager)}: asset 未发生赋值");
+            }
+            EditorUtility.SetDirty(Instance);
         }
         #endregion
     }

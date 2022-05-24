@@ -682,7 +682,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 941bb032a99cdd847b6282da3659d4d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  assembliesData: {fileID: 11400000, guid: a1785265277df364196604db5eed2902, type: 2}
+  hotfixAssemblies: {fileID: 11400000, guid: a1785265277df364196604db5eed2902, type: 2}
+  hotfixScene:
+    m_AssetGUID: 93480ec77789fb84e897488ce5a9a011
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   button: {fileID: 1325342301}
   testLoad: 0
 --- !u!1 &1287991331
