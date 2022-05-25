@@ -25,10 +25,10 @@ namespace zFramework.Hotfix.Toolkit
 
         private void LoadAssembliesReference(UnityEngine.Object target)
         {
-            AssetReference Selector(AssemblyData data)
+            AssetReference Selector(HotfixAssemblyInfo data)
             {
                 var asset = new AssetReference();
-                asset.SetEditorAsset(data.hotfixAssembly);
+                asset.SetEditorAsset(data.bytesAsset);
                 return asset;
             }
             var data = target as HotfixAssembliesData;

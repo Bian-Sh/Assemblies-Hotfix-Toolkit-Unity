@@ -18,7 +18,7 @@ namespace zFramework.Hotfix.Toolkit
             {
                 property.objectReferenceValue = null;
                 var pos = new Rect(position);
-                pos.x = position.width - 80;
+                pos.x = position.width - 100;
                 pos.y = position.y - 20;
                 var color = GUI.color;
                 GUI.color = Color.red;

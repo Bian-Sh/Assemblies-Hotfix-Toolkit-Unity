@@ -19,8 +19,13 @@ namespace zFramework.Hotfix.Toolkit
         [Header("热更 DLL 存储的文件展名："), ReadOnly]
         public string fileExtension = ".bytes";
 
+        [Header("Dll 转存文件夹"), FolderValidate]
+        public DefaultAsset folder;
+
         [Header("需要热更的程序集定义文件：")]
-        public List<AssemblyData> assemblies;
+        public List<HotfixAssemblyInfo> assemblies;
+
+        private bool IsValid =>folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
         #endregion
 
         #region Filter Assembly files when build application
@@ -117,32 +122,36 @@ namespace zFramework.Hotfix.Toolkit
         #region Assistance Typs And Functions
         private static ReturnCode StoreHotfixAssemblies(string src)
         {
-            var lib_dir = Path.Combine(Application.dataPath, "..", "Library\\ScriptAssemblies");
             foreach (var item in Instance.assemblies)
             {
-                if (item.IsValid)    // 如果配置正确则尝试转存储文件
+                if (Instance.IsValid&&item.IsValid)    // 如果配置正确则尝试转存储文件
                 {
-                    var file = new FileInfo(Path.Combine(lib_dir, item.Dll));
-                    FileUtil.ReplaceFile(Path.Combine(src, item.Dll), item.OutputPath);
+                    var output = Path.Combine( AssetDatabase.GetAssetPath(Instance.folder),item.Name,Instance.fileExtension);
+                    FileUtil.ReplaceFile(Path.Combine(src, item.Dll), item.Name);
+                    if (item.bytesAsset)
+                    {
+
+                    }
+
                     UpdateInformation(item);
                 }
                 else
                 {
-                    Debug.LogError($"{nameof(AssemblyHotfixManager)}: 请先完善 Hotfix Configuration 配置项！");
+                    Debug.LogError($"{nameof(AssemblyHotfixManager)}: 请先完善 Assembly Hotfix Manager 配置项！");
                     return ReturnCode.Exception;
                 }
             }
             return ReturnCode.Success;
         }
 
-        private static void UpdateInformation(AssemblyData item)
+        private static void UpdateInformation(HotfixAssemblyInfo item)
         {
             AssetDatabase.Refresh();
             // todo :直接转为 可寻址对象
-            var asset = AssetDatabase.LoadMainAssetAtPath(item.OutputPath) as TextAsset;
-            if ( asset!= item.hotfixAssembly)
+            var asset = AssetDatabase.LoadMainAssetAtPath(item.Name) as TextAsset;
+            if ( asset!= item.bytesAsset)
             {
-                item.hotfixAssembly = asset;
+                item.bytesAsset = asset;
                 Debug.Log($"{nameof(AssemblyHotfixManager)}: asset 替换成功");
             }
             else
