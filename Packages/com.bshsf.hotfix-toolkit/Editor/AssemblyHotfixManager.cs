@@ -25,7 +25,7 @@ namespace zFramework.Hotfix.Toolkit
         [Header("需要热更的程序集定义文件：")]
         public List<HotfixAssemblyInfo> assemblies;
 
-        private bool IsValid =>folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
+        private bool IsValid => folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
         #endregion
 
         #region Filter Assembly files when build application
@@ -124,16 +124,15 @@ namespace zFramework.Hotfix.Toolkit
         {
             foreach (var item in Instance.assemblies)
             {
-                if (Instance.IsValid&&item.IsValid)    // 如果配置正确则尝试转存储文件
+                if (Instance.IsValid && item.IsValid)    // 如果配置正确则尝试转存储文件
                 {
-                    var output = Path.Combine( AssetDatabase.GetAssetPath(Instance.folder),item.Name,Instance.fileExtension);
-                    FileUtil.ReplaceFile(Path.Combine(src, item.Dll), item.Name);
-                    if (item.bytesAsset)
-                    {
+                    var output = Path.Combine(AssetDatabase.GetAssetPath(Instance.folder), $"{item.Name}{Instance.fileExtension}");
+                    FileUtil.ReplaceFile(Path.Combine(src, item.Dll), output);
 
-                    }
-
-                    UpdateInformation(item);
+                    AssetDatabase.Refresh();
+                    var asset = AssetDatabase.LoadMainAssetAtPath(output) as TextAsset;
+                    item.bytesAsset = asset;
+                    EditorUtility.SetDirty(Instance);
                 }
                 else
                 {
@@ -141,24 +140,15 @@ namespace zFramework.Hotfix.Toolkit
                     return ReturnCode.Exception;
                 }
             }
+            UpdateHotfixConfiguration();
             return ReturnCode.Success;
         }
 
-        private static void UpdateInformation(HotfixAssemblyInfo item)
+
+        //todo: 自动构建文件夹，自动转变资产为 AA资产，自动构建 AA Group ，自动打组
+        private static void UpdateHotfixConfiguration()
         {
-            AssetDatabase.Refresh();
-            // todo :直接转为 可寻址对象
-            var asset = AssetDatabase.LoadMainAssetAtPath(item.Name) as TextAsset;
-            if ( asset!= item.bytesAsset)
-            {
-                item.bytesAsset = asset;
-                Debug.Log($"{nameof(AssemblyHotfixManager)}: asset 替换成功");
-            }
-            else
-            {
-                Debug.Log($"{nameof(AssemblyHotfixManager)}: asset 未发生赋值");
-            }
-            EditorUtility.SetDirty(Instance);
+
         }
         #endregion
     }

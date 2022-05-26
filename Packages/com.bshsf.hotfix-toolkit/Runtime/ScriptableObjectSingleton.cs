@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 #if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
@@ -38,13 +38,13 @@ namespace zFramework.Hotfix.Toolkit
                             instance = CreateInstance(t) as T;
                             AssetDatabase.CreateAsset(instance, file);
                             AssetDatabase.Refresh();
-                            //todo : ½«Õâ¸öÓÎÏ·¶ÔÏóÉèÖÃÎª¿ÉÑ°Ö·¶ÔÏó£¬°üÀ¨Ëü¹ÜÀíµÄ ³ÌĞò¼¯£¬×îºóÖ»ĞèÒªÓÃ»§×Ô¼ºÅäÖÃ host ¼´¿É
+                            //todo : å°†è¿™ä¸ªæ¸¸æˆå¯¹è±¡è®¾ç½®ä¸ºå¯å¯»å€å¯¹è±¡ï¼ŒåŒ…æ‹¬å®ƒç®¡ç†çš„ ç¨‹åºé›†ï¼Œæœ€ååªéœ€è¦ç”¨æˆ·è‡ªå·±é…ç½® host å³å¯
                             //https://forum.unity.com/threads/set-asset-as-addressable-through-script.718751/
                         }
                     }
                     else
                     {
-                        throw new InvalidOperationException($"ScriptableObject µÄµ¥ÀıÎñ±ØÊ¹ÓÃ {nameof(SingletonParamAttribute)} Ö¸¶¨ asset ´æ´¢Â·¾¶!");
+                        throw new InvalidOperationException($"ScriptableObject çš„å•ä¾‹åŠ¡å¿…ä½¿ç”¨ {nameof(SingletonParamAttribute)} æŒ‡å®š asset å­˜å‚¨è·¯å¾„!");
                     }
                 }
             }
@@ -67,7 +67,7 @@ namespace zFramework.Hotfix.Toolkit
             }
             else
             {
-                throw new InvalidOperationException("ScriptableObject µÄµ¥Àı asset ´æ´¢Â·¾¶²»µÃÎª¿Õ!");
+                throw new InvalidOperationException("ScriptableObject çš„å•ä¾‹ asset å­˜å‚¨è·¯å¾„ä¸å¾—ä¸ºç©º!");
             }
         }
     }
