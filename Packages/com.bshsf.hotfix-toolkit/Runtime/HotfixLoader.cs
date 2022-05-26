@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -13,7 +14,7 @@ namespace zFramework.Hotfix.Toolkit
         [Tooltip("勾选则从 ab 中加载程序集！")]
         public bool testLoad = false;
 #endif
-        public AssetReferenceT<HotfixAssembliesData> hotfixAssemblies;
+        public AssetReferenceHotfixAssemblis hotfixAssemblies;
         IEnumerator Start()
         {
 #if UNITY_EDITOR
@@ -33,13 +34,26 @@ namespace zFramework.Hotfix.Toolkit
         }
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private void Reset()
         {
-            if (!hotfixAssemblies.editorAsset)
+            if (hotfixAssemblies == null)
+            {
+                if (UnityEditor.AssetDatabase.TryGetGUIDAndLocalFileIdentifier(HotfixAssembliesData.Instance,out string guid,out long  id))
+                {
+                    hotfixAssemblies = new AssetReferenceHotfixAssemblis(guid);
+                }
+            }
+            else if (!hotfixAssemblies.editorAsset)
             {
                 hotfixAssemblies.SetEditorAsset(HotfixAssembliesData.Instance);
             }
         }
 #endif
+
+        [Serializable]
+        public class AssetReferenceHotfixAssemblis : AssetReferenceT<HotfixAssembliesData>
+        {
+            public AssetReferenceHotfixAssemblis(string guid) : base(guid) { }
+        }
     }
 }

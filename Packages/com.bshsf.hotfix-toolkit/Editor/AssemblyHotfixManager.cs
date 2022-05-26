@@ -12,7 +12,7 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 namespace zFramework.Hotfix.Toolkit
 {
-    [SingletonParam("AssemblyHotfixToolkit")]
+    [SingletonParam(container)]
     public partial class AssemblyHotfixManager : ScriptableObjectSingleton<AssemblyHotfixManager>
     {
         #region Fields
@@ -25,8 +25,28 @@ namespace zFramework.Hotfix.Toolkit
         [Header("需要热更的程序集定义文件：")]
         public List<HotfixAssemblyInfo> assemblies;
 
-        private bool IsValid => folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
+        const string container = "AssemblyHotfixToolkit";
+
+        private bool IsFolderValid => folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
         #endregion
+
+        #region Scriptable Life 
+        private void OnEnable()
+        {
+            if (!IsFolderValid)
+            {
+                var path = $"Assets/{container}/Addressable";
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                    AssetDatabase.Refresh();
+                }
+                folder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
+                EditorUtility.SetDirty(this);
+            }
+        }
+        #endregion
+
 
         #region Filter Assembly files when build application
         /// <summary>
@@ -124,7 +144,7 @@ namespace zFramework.Hotfix.Toolkit
         {
             foreach (var item in Instance.assemblies)
             {
-                if (Instance.IsValid && item.IsValid)    // 如果配置正确则尝试转存储文件
+                if (Instance.IsFolderValid && item.IsValid)    // 如果配置正确则尝试转存储文件
                 {
                     var output = Path.Combine(AssetDatabase.GetAssetPath(Instance.folder), $"{item.Name}{Instance.fileExtension}");
                     FileUtil.ReplaceFile(Path.Combine(src, item.Dll), output);
