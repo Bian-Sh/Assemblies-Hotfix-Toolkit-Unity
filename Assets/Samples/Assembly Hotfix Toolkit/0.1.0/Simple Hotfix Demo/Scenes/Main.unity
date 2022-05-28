@@ -132,7 +132,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 109254, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 132536, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
       propertyPath: m_Name
@@ -448,7 +448,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 651ea6a82814eed428f1943eeadaf849, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testLoad: 0
   hotfixAssemblies:
     m_AssetGUID: a1785265277df364196604db5eed2902
     m_SubObjectName: 
