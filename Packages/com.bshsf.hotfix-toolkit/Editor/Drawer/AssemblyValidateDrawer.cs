@@ -11,7 +11,7 @@ namespace zFramework.Hotfix.Toolkit
     {
         SimpleAssemblyInfo info = new SimpleAssemblyInfo();
         GUIStyle style;
-
+        Rect rect = default;
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label, true);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -31,6 +31,8 @@ namespace zFramework.Hotfix.Toolkit
             {
                 message = "↓指定热更程序集↓";
             }
+
+            EditorGUI.PropertyField(position, property, label, true);
             if (!string.IsNullOrEmpty(message))
             {
                 var pos = new Rect(position);
@@ -39,11 +41,11 @@ namespace zFramework.Hotfix.Toolkit
                 {
                     style = new GUIStyle();
                     style.alignment = TextAnchor.MiddleRight;
-                    style.normal.textColor= Color.red;
+                    style.normal.textColor = Color.red;
                 }
                 GUI.Label(pos, message, style);
             }
-            EditorGUI.PropertyField(position, property, label, true);
+            rect = position;
         }
 
         private void ValidateReferences(string name)

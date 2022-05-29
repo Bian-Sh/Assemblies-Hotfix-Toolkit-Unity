@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 namespace zFramework.Hotfix.Toolkit
 {
@@ -10,6 +11,7 @@ namespace zFramework.Hotfix.Toolkit
         string HuatuoVersionPath = default;
         string url = @"https://github.com/focus-creative-games/huatuo_upm";
         GUIStyle style;
+        ReorderableList list;
         private void OnEnable()
         {
             HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");

@@ -38,8 +38,6 @@ namespace zFramework.Hotfix.Toolkit
                             instance = CreateInstance(t) as T;
                             AssetDatabase.CreateAsset(instance, file);
                             AssetDatabase.Refresh();
-                            //todo : 将这个游戏对象设置为可寻址对象，包括它管理的 程序集，最后只需要用户自己配置 host 即可
-                            //https://forum.unity.com/threads/set-asset-as-addressable-through-script.718751/
                         }
                     }
                     else

@@ -12,7 +12,6 @@ namespace zFramework.Hotfix.Toolkit
         public AssetReferenceHotfixAssemblis hotfixAssemblies;
         IEnumerator Start()
         {
-            //todo: 需要先加载依赖,按一定的顺序加载,希望全自动
             var handler = hotfixAssemblies.LoadAssetAsync();
             yield return handler;
             if (handler.Status == AsyncOperationStatus.Succeeded)

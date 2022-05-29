@@ -57,7 +57,7 @@ namespace zFramework.Hotfix.Toolkit
             int IOrderedCallback.callbackOrder => 0;
             string[] IFilterBuildAssemblies.OnFilterAssemblies(BuildOptions buildOptions, string[] assemblies)
             {
-                var hotfixAssemblies = Instance.assemblies.Select(v => v.Dll).ToList();
+                var hotfixAssemblies = Instance.assemblies.Select(v => $"{v.assembly.name}.dll").ToList();
                 return assemblies.Where(ass => hotfixAssemblies.All(dll => !ass.EndsWith(dll, StringComparison.OrdinalIgnoreCase))).ToArray();
             }
         }
@@ -93,7 +93,7 @@ namespace zFramework.Hotfix.Toolkit
                     {
                         string content = File.ReadAllText(file);
                         var data = JsonUtility.FromJson<ScriptingAssemblies>(content);
-                        var assemblies = Instance.assemblies.Select(v => v.Dll);
+                        var assemblies = Instance.assemblies.Select(v => $"{v.assembly.name}.dll");
                         foreach (string name in assemblies)
                         {
                             data.names.Add(name);
@@ -144,10 +144,10 @@ namespace zFramework.Hotfix.Toolkit
         {
             foreach (var item in Instance.assemblies)
             {
-                if (Instance.IsFolderValid && item.IsValid)    // 如果配置正确则尝试转存储文件
+                if (Instance.IsFolderValid && item.assembly)    // 如果配置正确则尝试转存储文件
                 {
-                    var output = Path.Combine(AssetDatabase.GetAssetPath(Instance.folder), $"{item.Name}{Instance.fileExtension}");
-                    FileUtil.ReplaceFile(Path.Combine(src, item.Dll), output);
+                    var output = Path.Combine(AssetDatabase.GetAssetPath(Instance.folder), $"{item.assembly.name}{Instance.fileExtension}");
+                    FileUtil.ReplaceFile(Path.Combine(src, $"{item.assembly.name}.dll"), output);
 
                     AssetDatabase.Refresh();
                     var asset = AssetDatabase.LoadMainAssetAtPath(output) as TextAsset;
