@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Pipeline;
@@ -28,6 +29,7 @@ namespace zFramework.Hotfix.Toolkit
         const string container = "AssemblyHotfixToolkit";
 
         private bool IsFolderValid => folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
+        private static IEnumerable<AssemblyName> references;
         #endregion
 
         #region Scriptable Life 
@@ -44,8 +46,18 @@ namespace zFramework.Hotfix.Toolkit
                 folder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
                 EditorUtility.SetDirty(this);
             }
+            references = AppDomain.CurrentDomain.GetAssemblies()
+                                                                  .Where(v => v.FullName.Contains("Assembly-CSharp"))
+                                                                  .SelectMany(v => v.GetReferencedAssemblies());
         }
         #endregion
+
+        /// <summary>
+        /// 校验是否被 Assembly-CSharp 等相关的程序集引用
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static bool IsUsedByAssemblyCSharp(string name) => references.Any(v => v.Name.Equals(name));
 
 
         #region Filter Assembly files when build application

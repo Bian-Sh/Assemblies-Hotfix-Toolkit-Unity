@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -12,12 +9,10 @@ namespace zFramework.Hotfix.Toolkit
     [CustomPropertyDrawer(typeof(HotfixAssemblyInfo))]
     public class HotfixAssemblyInfoDrawer : PropertyDrawer
     {
-        private float height;
         GUIStyle style;
-        bool isEditorAssembly = false;
-        bool isUsedByAssemblyCsharp = false;
-        bool isDuplicated = false;
-        bool hasValidate = false;
+        SimpleAssemblyInfo info = new SimpleAssemblyInfo();
+        float height;
+
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -69,7 +64,16 @@ namespace zFramework.Hotfix.Toolkit
                 using (var check = new EditorGUI.ChangeCheckScope())
                 {
                     EditorGUI.PropertyField(position, assemblis);
-                    HandleDragAndDrop(property, isDragging, isDropping);
+
+                    HandleDragAndDrop(property, isDragging, isDropping,out string message);
+
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        Debug.Log($"Assembly Hotfix Toolkit: {message}");
+                        var tip_rect = new Rect(position.x, position.y, position.width, position.height * 2);
+                        position.y += position.height * 2;
+                        EditorGUI.HelpBox(position, message, MessageType.Warning);
+                    }
 
                     if (check.changed)
                     {
@@ -86,18 +90,12 @@ namespace zFramework.Hotfix.Toolkit
                             Undo.RecordObject(property.serializedObject.targetObject, "RemoveTypeMissmatchedBytesFile");
                             bytesAsset.objectReferenceValue = null;
                         }
+
                         #endregion
 
                     }
                 }
                 #endregion
-
-
-
-
-
-
-
 
                 #region 绘制 转存 dll 字段
                 var enable = GUI.enabled;
@@ -107,7 +105,7 @@ namespace zFramework.Hotfix.Toolkit
                 GUI.enabled = enable;
                 #endregion
 
-                height = position.y - temp.y + position.height;
+                height = position.y - temp.y + position.height+20;
             }
             EditorGUI.indentLevel = indent;
             EditorGUI.EndProperty();
@@ -119,62 +117,50 @@ namespace zFramework.Hotfix.Toolkit
             return property.isExpanded ? this.height : base.GetPropertyHeight(property, label);
         }
 
-        private void HandleDragAndDrop(SerializedProperty property, bool isDragging, bool isDropping)
+        private void HandleDragAndDrop(SerializedProperty property, bool isDragging, bool isDropping,out string message)
         {
             var rejectedDrag = true;
+            bool isEditorAssembly = false;
+            bool isUsedByAssemblyCsharp = false;
+            bool isDuplicated = false;
+            message = string.Empty;
             if (isDragging)
             {
                 if (DragAndDrop.objectReferences[0] is AssemblyDefinitionAsset asmdef)
                 {
-                    if (!hasValidate)
+                    #region 查重
+                    var ahm = property.serializedObject.targetObject as AssemblyHotfixManager;
+                    isDuplicated = ahm.assemblies.Any(v => v.assembly && v.assembly.name == asmdef.name);
+                    #endregion
+                    if (!isDuplicated)
                     {
-                        hasValidate = true;
-                        Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: inside validate");
+                        EditorJsonUtility.FromJsonOverwrite(asmdef.text, info);
+                        isEditorAssembly = null != info.includePlatforms && info.includePlatforms.Length == 1 && info.includePlatforms[0] == "Editor";
+                        isUsedByAssemblyCsharp = AssemblyHotfixManager.IsUsedByAssemblyCSharp(info.name);
 
-                        #region 查重
-                        var ahm = property.serializedObject.targetObject as AssemblyHotfixManager;
-                        isDuplicated = ahm.assemblies.Any(v => v.assembly && v.assembly.name == asmdef.name);
-                        #endregion
-                        if (!isDuplicated)
+                        if (isEditorAssembly)
                         {
-                            var info = new SimpleAssemblyInfo();
-                            EditorJsonUtility.FromJsonOverwrite(asmdef.text, info);
-                            isEditorAssembly = null != info.includePlatforms && info.includePlatforms.Length == 1 && info.includePlatforms[0] == "Editor";
-                            isUsedByAssemblyCsharp = AppDomain.CurrentDomain.GetAssemblies()
-                                                                                   .Where(v => v.FullName.Contains("Assembly-CSharp"))
-                                                                                   .SelectMany(v => v.GetReferencedAssemblies())
-                                                                                   .Any(v => v.Name.Equals(info.name));
-
-                            if (isEditorAssembly)
-                            {
-                                Debug.LogError($"AssemblyHotfixToolkit：{info.name} 是编辑器程序集，不可热更！ ");
-                            }
-                            if (isUsedByAssemblyCsharp)
-                            {
-                                Debug.LogError($"AssemblyHotfixToolkit：{info.name} 被 Assembly-CSharp 相关程序集引用，不可热更！ ");
-                            }
+                            message = $"编辑器程序集不可热更！ ";
                         }
-                        else
+                        if (isUsedByAssemblyCsharp)
                         {
-                            Debug.LogError($"AssemblyHotfixToolkit：{asmdef.name} 已存在，无需重复添加！ ");
+                            message = $"被 Assembly-CSharp 相关程序集引用不可热更！ ";
                         }
                     }
+                    else
+                    {
+                        message = $"已存在，无需重复添加！ ";
+                    }
                     rejectedDrag = isEditorAssembly || isUsedByAssemblyCsharp || isDuplicated;
+                    DragAndDrop.visualMode = rejectedDrag ? DragAndDropVisualMode.Rejected : DragAndDropVisualMode.Generic;
                 }
-                DragAndDrop.visualMode = rejectedDrag ? DragAndDropVisualMode.Rejected : DragAndDropVisualMode.Generic;
-            }
-
-            if (Event.current.type== EventType.DragPerform|| Event.current.type == EventType.DragExited||Event.current.type!= EventType.DragUpdated)
-            {
-                isEditorAssembly = isUsedByAssemblyCsharp = isDuplicated = hasValidate = false;
-                Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: reset drag drop");
-            }
-
-            if (!rejectedDrag && isDropping)
-            {
-                property.objectReferenceValue = DragAndDrop.objectReferences[0];
-                Event.current.Use();
-                Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}:  asign  data");
+                if (!rejectedDrag && isDropping)
+                {
+                    property.objectReferenceValue = DragAndDrop.objectReferences[0];
+                    Event.current.Use();
+                    isEditorAssembly = isUsedByAssemblyCsharp = isDuplicated = false;
+                    Debug.LogError($"{nameof(HotfixAssemblyInfoDrawer)}:  asign  data");
+                }
             }
         }
 
