@@ -11,11 +11,11 @@ namespace zFramework.Hotfix.Toolkit
     {
         GUIStyle style;
         SimpleAssemblyInfo info = new SimpleAssemblyInfo();
-        float height;
-
+        string message;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+
             position.height = EditorGUIUtility.singleLineHeight + 2;
             var indent = EditorGUI.indentLevel;
             var labelWidth = EditorGUIUtility.labelWidth;
@@ -28,8 +28,8 @@ namespace zFramework.Hotfix.Toolkit
             var bts = bytesAsset.objectReferenceValue as TextAsset;
             #endregion
 
-            EditorGUI.BeginProperty(position, label, property);
             property.serializedObject.Update();
+            EditorGUI.BeginProperty(position, label, property);
 
             #region Draw title
             string name = asm ? asm.name : "程序集未指定";
@@ -52,28 +52,16 @@ namespace zFramework.Hotfix.Toolkit
             }
             #endregion
 
-            var temp = position;
             if (property.isExpanded)
             {
                 #region 绘制 程序集 定义文件字段
                 position.y += position.height + 6;
                 var field_rect = new Rect(position.x + EditorGUIUtility.labelWidth, position.y, position.width - EditorGUIUtility.labelWidth, position.height);
-                bool isDragging = Event.current.type == EventType.DragUpdated && field_rect.Contains(Event.current.mousePosition);
-                bool isDropping = Event.current.type == EventType.DragPerform && field_rect.Contains(Event.current.mousePosition);
-
+                message = HandleDragAndDrop(field_rect, property);
+                Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: after HandleDragAndDrop {message} ");
                 using (var check = new EditorGUI.ChangeCheckScope())
                 {
                     EditorGUI.PropertyField(position, assemblis);
-
-                    HandleDragAndDrop(property, isDragging, isDropping,out string message);
-
-                    if (!string.IsNullOrEmpty(message))
-                    {
-                        Debug.Log($"Assembly Hotfix Toolkit: {message}");
-                        var tip_rect = new Rect(position.x, position.y, position.width, position.height * 2);
-                        position.y += position.height * 2;
-                        EditorGUI.HelpBox(position, message, MessageType.Warning);
-                    }
 
                     if (check.changed)
                     {
@@ -96,6 +84,19 @@ namespace zFramework.Hotfix.Toolkit
                     }
                 }
                 #endregion
+                #region Draw Message
+                Rect tip_rect = default;
+
+                if (!string.IsNullOrEmpty(message))
+                {
+                    Debug.Log($"Assembly Hotfix Toolkit: {message}");
+                    position.y += position.height + 4;
+                    var height = EditorGUI.GetPropertyHeight(SerializedPropertyType.String, new GUIContent(message));
+                    tip_rect = new Rect(position.x, position.y, position.width, height);
+                    EditorGUI.HelpBox(tip_rect, message, MessageType.Warning);
+                }
+                #endregion
+
 
                 #region 绘制 转存 dll 字段
                 var enable = GUI.enabled;
@@ -105,7 +106,6 @@ namespace zFramework.Hotfix.Toolkit
                 GUI.enabled = enable;
                 #endregion
 
-                height = position.y - temp.y + position.height+20;
             }
             EditorGUI.indentLevel = indent;
             EditorGUI.EndProperty();
@@ -113,17 +113,30 @@ namespace zFramework.Hotfix.Toolkit
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            var assemblis = property.FindPropertyRelative("assembly");
+            var bytesAsset = property.FindPropertyRelative("bytesAsset");
 
-            return property.isExpanded ? this.height : base.GetPropertyHeight(property, label);
+            var height = EditorGUIUtility.singleLineHeight + 6;
+            height += EditorGUI.GetPropertyHeight(assemblis) + 4;
+            height += EditorGUI.GetPropertyHeight(bytesAsset) + 4;
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}:  inside {message}");
+                height += EditorGUI.GetPropertyHeight(SerializedPropertyType.String, new GUIContent(message)) + 8;
+            }
+            return property.isExpanded ? height : base.GetPropertyHeight(property, label);
         }
 
-        private void HandleDragAndDrop(SerializedProperty property, bool isDragging, bool isDropping,out string message)
+        private string HandleDragAndDrop(Rect field_rect, SerializedProperty property)
         {
+            bool isDragging = Event.current.type == EventType.DragUpdated && field_rect.Contains(Event.current.mousePosition);
+            bool isDropping = Event.current.type == EventType.DragPerform && field_rect.Contains(Event.current.mousePosition);
             var rejectedDrag = true;
             bool isEditorAssembly = false;
             bool isUsedByAssemblyCsharp = false;
             bool isDuplicated = false;
-            message = string.Empty;
+            Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: {property.FindPropertyRelative("assembly").objectReferenceValue?.name}  -  {isDragging} - {message}");
             if (isDragging)
             {
                 if (DragAndDrop.objectReferences[0] is AssemblyDefinitionAsset asmdef)
@@ -154,14 +167,13 @@ namespace zFramework.Hotfix.Toolkit
                     rejectedDrag = isEditorAssembly || isUsedByAssemblyCsharp || isDuplicated;
                     DragAndDrop.visualMode = rejectedDrag ? DragAndDropVisualMode.Rejected : DragAndDropVisualMode.Generic;
                 }
-                if (!rejectedDrag && isDropping)
-                {
-                    property.objectReferenceValue = DragAndDrop.objectReferences[0];
-                    Event.current.Use();
-                    isEditorAssembly = isUsedByAssemblyCsharp = isDuplicated = false;
-                    Debug.LogError($"{nameof(HotfixAssemblyInfoDrawer)}:  asign  data");
-                }
             }
+            if (!rejectedDrag && isDropping)
+            {
+                property.objectReferenceValue = DragAndDrop.objectReferences[0];
+                Debug.LogError($"{nameof(HotfixAssemblyInfoDrawer)}:  asign  data");
+            }
+            return message;
         }
 
         [Serializable]
