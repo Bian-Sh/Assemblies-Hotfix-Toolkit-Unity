@@ -11,12 +11,9 @@ namespace zFramework.Hotfix.Toolkit
         string HuatuoVersionPath = default;
         string url = @"https://github.com/focus-creative-games/huatuo_upm";
         GUIStyle style;
-        ReorderableList list;
         private void OnEnable()
         {
             HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
-            list = new ReorderableList(serializedObject, serializedObject.FindProperty("assemblies"), true, true, true, true);
-         //   list.
         }
         public override void OnInspectorGUI()
         {
@@ -56,12 +53,8 @@ namespace zFramework.Hotfix.Toolkit
                     // 遍历每一个属性并绘制
                     while (iterator.Next(false))
                     {
-                     //   if (iterator.name != "assemblies")
-                        {
                             EditorGUILayout.PropertyField(iterator);
-                        }
                     }
-                    //list.DoLayoutList();
                     this.serializedObject.ApplyModifiedProperties();
                 }
                 if (disable)

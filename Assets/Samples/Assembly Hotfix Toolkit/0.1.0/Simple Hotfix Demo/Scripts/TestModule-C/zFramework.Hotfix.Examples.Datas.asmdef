@@ -2,7 +2,8 @@
     "name": "zFramework.Hotfix.Examples.Datas",
     "rootNamespace": "",
     "references": [
-        "GUID:a14bc4a28cab3bf499f21094f281c116"
+        "GUID:a14bc4a28cab3bf499f21094f281c116",
+        "GUID:0874c2c39a32f31428a64c4f97347970"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

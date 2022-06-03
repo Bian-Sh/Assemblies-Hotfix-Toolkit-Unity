@@ -32,9 +32,16 @@ namespace zFramework.Hotfix.Toolkit
         private bool IsFolderValid => folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
         private static IEnumerable<AssemblyName> references;
         private static SimpleAssemblyInfo info = new SimpleAssemblyInfo();
+        private static IEnumerable<string> asmdefs;
         #endregion
 
-        #region Scriptable Life 
+        [MenuItem("CONTEXT/AssemblyHotfixManager/ForTestUseage")]
+        static void ContextMenu()
+        {
+            Debug.Log($"{nameof(AssemblyHotfixManager)}: wow~");
+        }
+
+        #region ScriptableObject Life time
         private void OnEnable()
         {
             if (!IsFolderValid)
@@ -48,13 +55,23 @@ namespace zFramework.Hotfix.Toolkit
                 folder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
                 EditorUtility.SetDirty(this);
             }
+            //获取所有有 Assembly-CSharp 字眼的程序集
             references = AppDomain.CurrentDomain.GetAssemblies()
                                                                   .Where(v => v.FullName.Contains("Assembly-CSharp"))
                                                                   .SelectMany(v => v.GetReferencedAssemblies());
+
+            //获取所有非只读的，可能会引用热更程序集的 Runtime 程序集
+            asmdefs = AssetDatabase.FindAssets("t:asmdef")
+                                         .Where(v =>
+                                         {
+                                             var path = AssetDatabase.GUIDToAssetPath(v);
+                                             path = Path.GetFullPath(path);
+                                             return !path.Contains("\\PackageCache\\") && !path.Contains("\\Editor\\");
+                                         });
         }
         #endregion
 
-        #region Assemblies Validate
+        #region Assemblies Validate And Assistant
         /// <summary>
         /// 校验是否被 Assembly-CSharp 等相关的程序集引用
         /// </summary>
@@ -96,9 +113,72 @@ namespace zFramework.Hotfix.Toolkit
                 return string.Empty;
             }
         }
-        public new static void SetDirty() 
+        /// <summary>
+        /// 获取引用了 热更程序集 的程序集
+        /// </summary>
+        /// <param name="target">热更程序集</param>
+        /// <returns></returns>
+        public static AssemblyDefinitionAsset[] GetAssembliesRefed(AssemblyDefinitionAsset target)
         {
-            EditorUtility.SetDirty(Instance);
+            if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(target, out var guid, out long _))
+            {
+                var asms = asmdefs.Where(v => !Instance.assemblies.Exists(x =>
+                {
+                    var path = AssetDatabase.GUIDToAssetPath(v);
+                    var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
+                    return x.assembly == asset;
+                }))
+                .Where(v =>
+                {
+                    var path = AssetDatabase.GUIDToAssetPath(v);
+                    var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
+                    var info = JsonUtility.FromJson<SimpleAssemblyInfo>(asset.text);
+                    return null != info.references && info.references.Contains($"GUID:{guid}");
+                })
+                .Select(v =>
+                {
+                    var path = AssetDatabase.GUIDToAssetPath(v);
+                    return AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
+                }).ToArray();
+                return asms;
+            }
+            else
+            {
+                throw new Exception("Unity 资产转 guid 失败!");
+            }
+        }
+
+        /// <summary>
+        /// 像热更程序集中添加需要热更的程序集
+        /// </summary>
+        /// <param name="asset"></param>
+        public static void AddAssemblyData(AssemblyDefinitionAsset asset)
+        {
+            var index = Instance.assemblies.FindIndex(v => v.assembly == asset);
+            if (index == -1)
+            {
+                Undo.RecordObject(Instance, "CaptureForSomeAssemblyLoaded");
+                var data = new HotfixAssemblyInfo
+                {
+                    assembly = asset
+                };
+                Instance.assemblies.Add(data);
+                EditorUtility.SetDirty(Instance);
+            }
+        }
+
+        /// <summary>
+        /// 把所有的校验都走一遍，用于卡最后打包
+        /// </summary>
+        /// <returns>false : 校验不通过，true ：校验通过</returns>
+        public static bool ValidateAll()
+        {
+            Func<HotfixAssemblyInfo, bool> Validate = info =>
+            IsEditorAssembly(info.assembly) ||
+                         IsAssemblyDuplicated(info.assembly) ||
+                         IsUsedByAssemblyCSharp(info.assembly) ||
+                         GetAssembliesRefed(info.assembly).Length > 0;
+            return !Instance.assemblies.Any(Validate);
         }
         #endregion
 
@@ -112,7 +192,12 @@ namespace zFramework.Hotfix.Toolkit
             int IOrderedCallback.callbackOrder => 0;
             string[] IFilterBuildAssemblies.OnFilterAssemblies(BuildOptions buildOptions, string[] assemblies)
             {
-                var hotfixAssemblies = Instance.assemblies.Select(v => $"{v.assembly.name}.dll").ToList();
+                var info = new SimpleAssemblyInfo();
+                var hotfixAssemblies = Instance.assemblies.Select(v =>
+                {
+                    EditorJsonUtility.FromJsonOverwrite(v.assembly.text, info);
+                    return $"{info.name}.dll";
+                }).ToList();
                 return assemblies.Where(ass => hotfixAssemblies.All(dll => !ass.EndsWith(dll, StringComparison.OrdinalIgnoreCase))).ToArray();
             }
         }
@@ -171,26 +256,45 @@ namespace zFramework.Hotfix.Toolkit
         #region Addressable Post Script Build Process
         [InitializeOnLoadMethod]
         static void InstallContentPipelineListener() => ContentPipeline.BuildCallbacks.PostScriptsCallbacks += PostScriptsCallbacks;
-        public static ReturnCode PostScriptsCallbacks(IBuildParameters parameters, IBuildResults results) => StoreHotfixAssemblies(parameters.ScriptOutputFolder);
+
+        public static ReturnCode PostScriptsCallbacks(IBuildParameters parameters, IBuildResults results)
+        {
+            if (ValidateAll())
+            {
+                return StoreHotfixAssemblies(parameters.ScriptOutputFolder);
+            }
+            else
+            {
+                Debug.LogError($"Hotfix Toolkit: 请先完善 Assembly Hotfix Manager 配置项！");
+                return ReturnCode.Exception;
+            }
+        }
 
         #endregion
 
         #region Force Reload Assemblies
         public static void ForceLoadAssemblies()
         {
-            var buildDir = Application.temporaryCachePath;
-            var files = new DirectoryInfo(buildDir).GetFiles();
-            foreach (var file in files)
+            if (ValidateAll())
             {
-                FileUtil.DeleteFileOrDirectory(file.FullName);
+                var buildDir = Application.temporaryCachePath;
+                var files = new DirectoryInfo(buildDir).GetFiles();
+                foreach (var file in files)
+                {
+                    FileUtil.DeleteFileOrDirectory(file.FullName);
+                }
+                var target = EditorUserBuildSettings.activeBuildTarget;
+                var group = BuildPipeline.GetBuildTargetGroup(target);
+                ScriptCompilationSettings scs = default;
+                scs.group = group;
+                scs.target = target;
+                PlayerBuildInterface.CompilePlayerScripts(scs, buildDir);
+                StoreHotfixAssemblies(buildDir);
             }
-            var target = EditorUserBuildSettings.activeBuildTarget;
-            var group = BuildPipeline.GetBuildTargetGroup(target);
-            ScriptCompilationSettings scs = default;
-            scs.group = group;
-            scs.target = target;
-            PlayerBuildInterface.CompilePlayerScripts(scs, buildDir);
-            StoreHotfixAssemblies(buildDir);
+            else
+            {
+                Debug.LogError($"Hotfix Toolkit: 请先完善 Assembly Hotfix Manager 配置项！");
+            }
         }
         #endregion
 
@@ -231,6 +335,7 @@ namespace zFramework.Hotfix.Toolkit
         {
             public string name;
             public string[] includePlatforms;
+            public List<string> references;
         }
         #endregion
     }

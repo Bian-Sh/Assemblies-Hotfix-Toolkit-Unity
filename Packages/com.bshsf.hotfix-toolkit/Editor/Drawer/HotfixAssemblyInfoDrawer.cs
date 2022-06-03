@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -17,6 +17,8 @@ namespace zFramework.Hotfix.Toolkit
             public GUIStyle style;
             public float height;
             public string message;
+            public string title;
+            public AssemblyDefinitionAsset[] assets;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -38,15 +40,15 @@ namespace zFramework.Hotfix.Toolkit
 
             #region Draw title
             var asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
-            string name = !string.IsNullOrEmpty(data.message) || !asm ? "³ÌĞò¼¯ÅäÖÃÒì³£" : asm.name;
             var color = EditorStyles.foldout.normal.textColor;
-            data.style.normal.textColor = asm ? color : Color.red;
+            data.style.normal.textColor = !asm || asm.name != data.title ? Color.red : color;
             if (!EditorGUIUtility.hierarchyMode)
             {
                 EditorGUI.indentLevel--;
             }
             EditorGUIUtility.labelWidth = position.width;
-            property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, new GUIContent(name), data.style);
+            title_Content.text = data.title;
+            property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, title_Content, true, data.style);
             EditorGUIUtility.labelWidth = labelWidth;
             if (!EditorGUIUtility.hierarchyMode)
             {
@@ -57,28 +59,38 @@ namespace zFramework.Hotfix.Toolkit
             if (property.isExpanded)
             {
 
-                #region Assembly ÓĞĞ§ĞÔĞ£Ñé
+                #region Assembly æœ‰æ•ˆæ€§æ ¡éªŒ
                 asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
                 if (asm)
                 {
-                    if (IsEditorAssembly(asm)) // ²éÊÇ·ñÎª±à¼­Æ÷½Å±¾
+                    if (IsEditorAssembly(asm)) // æŸ¥æ˜¯å¦ä¸ºç¼–è¾‘å™¨è„šæœ¬
                     {
-                        data.message = $"±à¼­Æ÷³ÌĞò¼¯²»¿ÉÈÈ¸ü£¡ ";
+                        data.message = "ç¼–è¾‘å™¨ç¨‹åºé›†ä¸å¯çƒ­æ›´ï¼ ";
                     }
-                    else if (IsUsedByAssemblyCSharp(asm)) // ²éÊÇ·ñ±»Unity»ù´¡³ÌĞò¼¯ÒıÓÃ
+                    else if (IsUsedByAssemblyCSharp(asm)) // æŸ¥æ˜¯å¦è¢«UnityåŸºç¡€ç¨‹åºé›†å¼•ç”¨
                     {
-                        data.message = $"±» Assembly-CSharp Ïà¹Ø³ÌĞò¼¯ÒıÓÃ²»¿ÉÈÈ¸ü£¡ ";
+                        data.message = "ä¸èƒ½è¢« Assembly-CSharp ç›¸å…³ç¨‹åºé›†å¼•ç”¨ï¼ ";
+                    } else if (GetIndexFromPropertyPath(path) != FirstIndexOf(asm) && IsAssemblyDuplicated(asm))// æŸ¥é‡
+                    {
+                        data.message = "ç¨‹åºé›†å·²å­˜åœ¨ï¼ ";
                     }
-
+                    else //æŸ¥æœ‰è¢«è°å¼•ç”¨ç€ï¼Œè¿™äº›ä¸ªç¨‹åºé›†ä¹Ÿéœ€è¦çƒ­æ›´ï¼Œæˆ–è€…ï¼Œä½ ä¿®æ­£å¼•ç”¨å…³ç³»
+                    {
+                        data.assets = GetAssembliesRefed(asm);
+                        if (data.assets.Length > 0)
+                        {
+                            data.message = "è¢«ä»¥ä¸‹ç¨‹åºé›†å¼•ç”¨ï¼š";
+                        }
+                    }
                 }
                 else
                 {
-                    data.message = $"ÇëÖ¸¶¨ĞèÒªÈÈ¸üµÄ³ÌĞò¼¯£¡ ";
+                    data.message = "ç¨‹åºé›†æœªæŒ‡å®šï¼ ";
                 }
                 #endregion
 
 
-                #region »æÖÆ ³ÌĞò¼¯ ¶¨ÒåÎÄ¼ş×Ö¶Î
+                #region ç»˜åˆ¶ ç¨‹åºé›† å®šä¹‰æ–‡ä»¶å­—æ®µ
                 position.y += position.height + 6;
                 using (var check = new EditorGUI.ChangeCheckScope())
                 {
@@ -86,13 +98,7 @@ namespace zFramework.Hotfix.Toolkit
                     if (check.changed)
                     {
                         property.serializedObject.ApplyModifiedProperties();
-
-                        if (IsAssemblyDuplicated(asm))// ²éÖØ
-                        {
-                            data.message = $"·¢ÏÖÖØ¸´Ìí¼ÓµÄ³ÌĞò¼¯£¡ ";
-                        }
-
-                        #region ×ª´æÎÄ¼şÓĞĞ§ĞÔÑéÖ¤£ºassembly ²»Îª¿ÕÇÒÃû³ÆÓë ×ª´æÎÄ¼şÃû³ÆÆ¥Åä
+                        #region è½¬å­˜æ–‡ä»¶æœ‰æ•ˆæ€§éªŒè¯ï¼šassembly ä¸ä¸ºç©ºä¸”åç§°ä¸ è½¬å­˜æ–‡ä»¶åç§°åŒ¹é…
                         asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
                         bts = property.FindPropertyRelative("bytesAsset").objectReferenceValue as TextAsset;
 
@@ -102,28 +108,52 @@ namespace zFramework.Hotfix.Toolkit
                             property.FindPropertyRelative("bytesAsset").objectReferenceValue = null;
                             property.serializedObject.ApplyModifiedProperties();
                         }
-                        Editor editor = default;
-                        Editor.CreateCachedEditor(property.serializedObject.targetObject, typeof(AssemblyHotfixManagerEditor), ref editor);
-                        editor.Repaint();
+                        //Editor editor = default;
+                        //Editor.CreateCachedEditor(property.serializedObject.targetObject, typeof(AssemblyHotfixManagerEditor), ref editor);
+                        //editor.Repaint();
                         #endregion
                     }
                 }
 
                 #endregion
                 #region Draw Message
-                Rect tip_rect = default;
+                data.title = !string.IsNullOrEmpty(data.message) || !asm ? "ç¨‹åºé›†é…ç½®å¼‚å¸¸" : asm.name;
                 if (!string.IsNullOrEmpty(data.message))
                 {
                     position.y += position.height + 4;
-                    var height = EditorGUI.GetPropertyHeight(SerializedPropertyType.String, new GUIContent(data.message));
-                    tip_rect = new Rect(position.x, position.y, position.width, height);
-                    EditorGUI.HelpBox(tip_rect, data.message, MessageType.Error);
+                    EditorGUI.HelpBox(position, data.message, MessageType.Error);
                     data.message = string.Empty;
                 }
+
+                if (data.assets.Length > 0)
+                {
+                    for (int i = 0; i < data.assets.Length; i++)
+                    {
+                        position.y += position.height + 4;
+                        var obj_rect = new Rect(position);
+                        obj_rect.width -= 64;
+                        var enabled = GUI.enabled;
+                        GUI.enabled = false;
+                        EditorGUI.ObjectField(obj_rect, data.assets[i], typeof(AssemblyDefinitionAsset), false);
+                        GUI.enabled = true;
+                        
+                        var bt_rect = new Rect(position);
+                        bt_rect.x = bt_rect.width-(!EditorGUIUtility.hierarchyMode?30:15);
+                        bt_rect.width = 62;
+                        if (GUI.Button(bt_rect, fixButton))
+                        {
+                            AddAssemblyData(data.assets[i]);
+                        }
+                    }
+                    data.assets = new AssemblyDefinitionAsset[0];
+                }
+
+
+
                 #endregion
 
 
-                #region »æÖÆ ×ª´æ dll ×Ö¶Î
+                #region ç»˜åˆ¶ è½¬å­˜ dll å­—æ®µ
                 var enable = GUI.enabled;
                 GUI.enabled = false;
                 position.y += position.height + 4;
@@ -131,11 +161,7 @@ namespace zFramework.Hotfix.Toolkit
                 GUI.enabled = enable;
                 #endregion
             }
-            else
-            {
-
-            }
-            drawerState[path].height = position.y - orign.y + EditorGUIUtility.singleLineHeight + 2;
+            data.height = position.y - orign.y + EditorGUIUtility.singleLineHeight + 6;
             EditorGUI.indentLevel = indent;
             EditorGUI.EndProperty();
         }
@@ -148,12 +174,26 @@ namespace zFramework.Hotfix.Toolkit
             {
                 data = new DrawerState();
                 data.style = new GUIStyle(EditorStyles.foldout);
-                drawerState[path] = data;
                 data.height = base.GetPropertyHeight(property, label);
+                data.title = property.FindPropertyRelative("assembly").objectReferenceValue?.name;
+                data.assets = new AssemblyDefinitionAsset[0];
+                drawerState[path] = data;
             }
             return data.height;
         }
 
+        private int FirstIndexOf(AssemblyDefinitionAsset asset)
+        {
+            return AssemblyHotfixManager.Instance.assemblies.FindIndex(v => v.assembly == asset);
+        }
+        private int GetIndexFromPropertyPath(string path)
+        {
+            var arr = path.Split(new string[] { "Array.data[", "]" }, StringSplitOptions.RemoveEmptyEntries);
+            return Convert.ToInt32(arr[1]);
+        }
+
+        GUIContent fixButton = new GUIContent("fix", "ç‚¹å‡»ä»¥è½½å…¥,å¦åˆ™è¯·æ–­å¼€å¼•ç”¨å…³ç³»ï¼");
+        GUIContent title_Content = new GUIContent();
 
     }
 }
