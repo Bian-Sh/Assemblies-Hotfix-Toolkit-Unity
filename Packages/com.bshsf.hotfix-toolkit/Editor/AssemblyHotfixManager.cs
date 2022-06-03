@@ -10,6 +10,7 @@ using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEditor.Build.Player;
 using UnityEditor.Build.Reporting;
+using UnityEditorInternal;
 using UnityEngine;
 namespace zFramework.Hotfix.Toolkit
 {
@@ -30,6 +31,7 @@ namespace zFramework.Hotfix.Toolkit
 
         private bool IsFolderValid => folder && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(folder));
         private static IEnumerable<AssemblyName> references;
+        private static SimpleAssemblyInfo info = new SimpleAssemblyInfo();
         #endregion
 
         #region Scriptable Life 
@@ -52,12 +54,53 @@ namespace zFramework.Hotfix.Toolkit
         }
         #endregion
 
+        #region Assemblies Validate
         /// <summary>
         /// 校验是否被 Assembly-CSharp 等相关的程序集引用
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">需要校验的程序集名称</param>
         /// <returns></returns>
-        public static bool IsUsedByAssemblyCSharp(string name) => references.Any(v => v.Name.Equals(name));
+        public static bool IsUsedByAssemblyCSharp(AssemblyDefinitionAsset asset)
+        {
+            EditorJsonUtility.FromJsonOverwrite(asset.text, info);
+            return references.Any(v => v.Name.Equals(info.name));
+        }
+
+        /// <summary>
+        ///  校验程序集是否重复
+        /// </summary>
+        /// <param name="name">需要校验的程序集名称</param>
+        /// <returns></returns>
+        public static bool IsAssemblyDuplicated(AssemblyDefinitionAsset asset) => Instance.assemblies.Count(v => v.assembly && v.assembly == asset) > 1;
+
+        /// <summary>
+        /// 校验程序集是否为 编辑器 程序集
+        /// </summary>
+        /// <param name="asset">需要校验的 程序集名称</param>
+        /// <returns></returns>
+        public static bool IsEditorAssembly(AssemblyDefinitionAsset asset)
+        {
+            EditorJsonUtility.FromJsonOverwrite(asset.text, info);
+            return null != info.includePlatforms && info.includePlatforms.Length == 1 && info.includePlatforms[0] == "Editor";
+        }
+
+        public static string GetAssemblyName(AssemblyDefinitionAsset asset)
+        {
+            if (asset)
+            {
+                EditorJsonUtility.FromJsonOverwrite(asset.text, info);
+                return info.name;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+        public new static void SetDirty() 
+        {
+            EditorUtility.SetDirty(Instance);
+        }
+        #endregion
 
 
         #region Filter Assembly files when build application
@@ -181,6 +224,13 @@ namespace zFramework.Hotfix.Toolkit
         private static void UpdateHotfixConfiguration()
         {
 
+        }
+
+        [Serializable]
+        public class SimpleAssemblyInfo
+        {
+            public string name;
+            public string[] includePlatforms;
         }
         #endregion
     }

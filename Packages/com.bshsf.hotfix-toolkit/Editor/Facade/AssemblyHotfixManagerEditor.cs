@@ -15,6 +15,8 @@ namespace zFramework.Hotfix.Toolkit
         private void OnEnable()
         {
             HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
+            list = new ReorderableList(serializedObject, serializedObject.FindProperty("assemblies"), true, true, true, true);
+         //   list.
         }
         public override void OnInspectorGUI()
         {
@@ -54,8 +56,12 @@ namespace zFramework.Hotfix.Toolkit
                     // 遍历每一个属性并绘制
                     while (iterator.Next(false))
                     {
-                        EditorGUILayout.PropertyField(iterator);
+                     //   if (iterator.name != "assemblies")
+                        {
+                            EditorGUILayout.PropertyField(iterator);
+                        }
                     }
+                    //list.DoLayoutList();
                     this.serializedObject.ApplyModifiedProperties();
                 }
                 if (disable)

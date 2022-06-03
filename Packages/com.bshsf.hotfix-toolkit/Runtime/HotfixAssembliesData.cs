@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace zFramework.Hotfix.Toolkit
 {
-    [SingletonParam("AssemblyHotfixToolkit", addressable = true)]
+    [SingletonParam("AssemblyHotfixToolkit")]
     public class HotfixAssembliesData : ScriptableObjectSingleton<HotfixAssembliesData>
     {
         public List<AssetReference> assemblies;

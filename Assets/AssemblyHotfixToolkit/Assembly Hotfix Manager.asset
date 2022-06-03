@@ -15,7 +15,7 @@ MonoBehaviour:
   fileExtension: .bytes
   folder: {fileID: 102900000, guid: 54bdeedbd6ff33b4f85ded4d73744004, type: 3}
   assemblies:
-  - assembly: {fileID: 5897886265953266890, guid: 5b79e92f685c13d4586711d80f25116f, type: 3}
-    bytesAsset: {fileID: 4900000, guid: cce56d6a771a5bd499f7253d3de25e1c, type: 3}
-  - assembly: {fileID: 0}
+  - assembly: {fileID: 5897886265953266890, guid: 0874c2c39a32f31428a64c4f97347970, type: 3}
+    bytesAsset: {fileID: 0}
+  - assembly: {fileID: 5897886265953266890, guid: 0874c2c39a32f31428a64c4f97347970, type: 3}
     bytesAsset: {fileID: 0}

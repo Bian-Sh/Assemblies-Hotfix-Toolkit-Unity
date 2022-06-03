@@ -20,12 +20,15 @@ namespace zFramework.Hotfix.Toolkit
             {
                 loader = target as HotfixLoader;
             }
-
             var rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.foldoutHeader);
             var f_rect = new Rect(rect);
             f_rect.width = EditorGUIUtility.labelWidth;
             data.isExpanded = EditorGUI.BeginFoldoutHeaderGroup(f_rect, data.isExpanded, "");
             EditorGUI.EndFoldoutHeaderGroup();
+            var pick_rect = new Rect(rect);
+            pick_rect.x = pick_rect.width-4;
+            pick_rect.width = 22;
+            GUI.Button(pick_rect,new GUIContent("","此配置自动分配且不可修改！"),EditorStyles.miniButtonRight);
             EditorGUI.PropertyField(rect, data);
 
             EditorGUI.indentLevel++;

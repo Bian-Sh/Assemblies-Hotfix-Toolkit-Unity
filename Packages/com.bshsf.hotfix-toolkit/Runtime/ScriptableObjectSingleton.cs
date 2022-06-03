@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
+
 namespace zFramework.Hotfix.Toolkit
 {
     public class ScriptableObjectSingleton<T> : ScriptableObject where T : ScriptableObject
@@ -24,7 +25,8 @@ namespace zFramework.Hotfix.Toolkit
                     var attr = t.GetCustomAttributes(typeof(SingletonParamAttribute), false);
                     if (attr.Length > 0)
                     {
-                        var abPath = (attr[0] as SingletonParamAttribute).path;
+                        var spa = attr[0] as SingletonParamAttribute;
+                        var abPath = spa.path;
                         var path = Path.Combine(Application.dataPath, abPath);
                         var dir = new DirectoryInfo(path);
                         if (!dir.Exists)
@@ -55,10 +57,8 @@ namespace zFramework.Hotfix.Toolkit
     public class SingletonParamAttribute : Attribute
     {
         public string path;
-        public bool addressable;
-        public SingletonParamAttribute(string path, bool addressable = false)
+        public SingletonParamAttribute(string path)
         {
-            this.addressable = addressable;
             if (!string.IsNullOrEmpty(path))
             {
                 this.path = path;
