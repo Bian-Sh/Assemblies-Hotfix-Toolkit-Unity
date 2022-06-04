@@ -336,15 +336,7 @@ namespace zFramework.Hotfix.Toolkit
                     return ReturnCode.Exception;
                 }
             }
-            UpdateHotfixConfiguration();
             return ReturnCode.Success;
-        }
-
-
-        //todo: 自动构建文件夹，自动转变资产为 AA资产，自动构建 AA Group ，自动打组
-        private static void UpdateHotfixConfiguration()
-        {
-
         }
 
         [Serializable]
@@ -353,6 +345,13 @@ namespace zFramework.Hotfix.Toolkit
             public string name;
             public string[] includePlatforms;
             public List<string> references;
+        }
+        #endregion
+
+        #region Addressables Assistant
+        public static void MoveToAddressablesGroup(UnityEngine.Object target)
+        {
+
         }
         #endregion
     }
