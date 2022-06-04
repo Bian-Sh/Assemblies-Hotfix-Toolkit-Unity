@@ -35,12 +35,6 @@ namespace zFramework.Hotfix.Toolkit
         private static IEnumerable<string> asmdefs;
         #endregion
 
-        [MenuItem("CONTEXT/AssemblyHotfixManager/ForTestUseage")]
-        static void ContextMenu()
-        {
-            Debug.Log($"{nameof(AssemblyHotfixManager)}: wow~");
-        }
-
         #region ScriptableObject Life time
         private void OnEnable()
         {
@@ -100,7 +94,17 @@ namespace zFramework.Hotfix.Toolkit
             EditorJsonUtility.FromJsonOverwrite(asset.text, info);
             return null != info.includePlatforms && info.includePlatforms.Length == 1 && info.includePlatforms[0] == "Editor";
         }
-
+        /// <summary>
+        /// 校验程序集是否被其他程序集所引用
+        /// </summary>
+        /// <param name="asset">检查对象程序集</param>
+        /// <param name="guid">检查目标程序集</param>
+        /// <returns>true :被引用，false 未被引用</returns>
+        public static bool IsSomeAssemblyReferenced(AssemblyDefinitionAsset asset,string guid)
+        {
+            EditorJsonUtility.FromJsonOverwrite(asset.text, info);
+            return null != info.references && info.references.Contains($"GUID:{guid}");
+        }
         public static string GetAssemblyName(AssemblyDefinitionAsset asset)
         {
             if (asset)
@@ -132,8 +136,7 @@ namespace zFramework.Hotfix.Toolkit
                 {
                     var path = AssetDatabase.GUIDToAssetPath(v);
                     var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
-                    var info = JsonUtility.FromJson<SimpleAssemblyInfo>(asset.text);
-                    return null != info.references && info.references.Contains($"GUID:{guid}");
+                    return !IsEditorAssembly(asset)&& IsSomeAssemblyReferenced(asset,guid);
                 })
                 .Select(v =>
                 {
@@ -179,6 +182,21 @@ namespace zFramework.Hotfix.Toolkit
                          IsUsedByAssemblyCSharp(info.assembly) ||
                          GetAssembliesRefed(info.assembly).Length > 0;
             return !Instance.assemblies.Any(Validate);
+        }
+
+
+        public static  bool TryGetAssemblyBytesAsset(AssemblyDefinitionAsset asm ,out TextAsset asset)
+        {
+            var path = AssetDatabase.GetAssetPath(Instance.folder);
+            EditorJsonUtility.FromJsonOverwrite(asm.text,info);
+            var file = $"{path}/{info.name}{Instance.fileExtension}";
+            asset = default;
+            if (File.Exists(file))
+            {
+                Debug.Log($"{nameof(AssemblyHotfixManager)}: 2222");
+                asset = AssetDatabase.LoadAssetAtPath<TextAsset>(file);
+            }
+            return asset;
         }
         #endregion
 

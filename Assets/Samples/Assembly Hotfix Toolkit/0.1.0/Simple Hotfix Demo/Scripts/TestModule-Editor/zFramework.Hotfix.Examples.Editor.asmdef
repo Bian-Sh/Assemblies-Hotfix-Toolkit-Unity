@@ -1,0 +1,18 @@
+{
+    "name": "zFramework.Hotfix.Examples.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:5b79e92f685c13d4586711d80f25116f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
