@@ -193,7 +193,6 @@ namespace zFramework.Hotfix.Toolkit
             asset = default;
             if (File.Exists(file))
             {
-                Debug.Log($"{nameof(AssemblyHotfixManager)}: 2222");
                 asset = AssetDatabase.LoadAssetAtPath<TextAsset>(file);
             }
             return asset;
