@@ -43,7 +43,7 @@ Preset:
   - target: {fileID: 0}
     propertyPath: assemblies.Array.data[0].bytesAsset
     value: 
-    objectReference: {fileID: 0}
+    objectReference: {fileID: 4900000, guid: cce56d6a771a5bd499f7253d3de25e1c, type: 3}
   - target: {fileID: 0}
     propertyPath: assemblies.Array.data[1].assembly
     value: 

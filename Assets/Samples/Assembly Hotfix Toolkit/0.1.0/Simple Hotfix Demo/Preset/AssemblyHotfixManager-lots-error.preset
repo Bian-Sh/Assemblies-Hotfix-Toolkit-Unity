@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!181963792 &2655988077585873504
+Preset:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: AssemblyHotfixManager-lots-error
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 484b3401b0beb19438867534a6f34e9d, type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileExtension
+    value: .bytes
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: folder
+    value: 
+    objectReference: {fileID: 102900000, guid: 54bdeedbd6ff33b4f85ded4d73744004, type: 3}
+  - target: {fileID: 0}
+    propertyPath: groupName
+    value: Hotfix Assemblies Group
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.size
+    value: 7
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[0].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: 0874c2c39a32f31428a64c4f97347970, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[0].bytesAsset
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[1].assembly
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[1].bytesAsset
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[2].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: f4ddbbe745eb66243833d87b9618bb96, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[2].bytesAsset
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[3].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: 9505f2207e19b1a4f9fe31599dc493c8, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[3].bytesAsset
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[4].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: 7f26512e7c8a67946bbfb4e8c8378863, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[4].bytesAsset
+    value: 
+    objectReference: {fileID: 4900000, guid: b2613a85f2af5c24e91334be2ca82c72, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[5].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: 0874c2c39a32f31428a64c4f97347970, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[5].bytesAsset
+    value: 
+    objectReference: {fileID: 4900000, guid: b2613a85f2af5c24e91334be2ca82c72, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[6].assembly
+    value: 
+    objectReference: {fileID: 5897886265953266890, guid: 0874c2c39a32f31428a64c4f97347970, type: 3}
+  - target: {fileID: 0}
+    propertyPath: assemblies.Array.data[6].bytesAsset
+    value: 
+    objectReference: {fileID: 4900000, guid: b2613a85f2af5c24e91334be2ca82c72, type: 3}
+  m_ExcludedProperties: []

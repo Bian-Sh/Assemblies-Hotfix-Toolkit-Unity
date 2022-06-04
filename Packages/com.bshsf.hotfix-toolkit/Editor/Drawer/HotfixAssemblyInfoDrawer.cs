@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace zFramework.Hotfix.Toolkit
 {
@@ -107,11 +109,28 @@ namespace zFramework.Hotfix.Toolkit
                     {
                         Undo.RecordObject(property.serializedObject.targetObject, "LoadTypeMatchedBytesFile");
                         property.FindPropertyRelative("bytesAsset").objectReferenceValue = bts;
+                        MoveToAddressablesGroup(bts);
+                        UpdateHotfixAssemliesData(bts);
                         property.serializedObject.ApplyModifiedProperties();
                     }
                     else
                     {
                         message2 = "热更二进制文件不存在，请通过 Force Build Assembly 构建、转存并挂载！";
+                    }
+                }
+                #endregion
+
+                #region 校验 Addressables 相关
+                if (bts&&!IsAddressable(bts))
+                {
+                    if (!AddressableAssetSettingsDefaultObject.Settings)
+                    {
+                        message2 = "请先通过菜单：“Window/Asset Management/Addressables/Groups” 初始化可寻址！";
+                    }
+                    else
+                    {
+                        MoveToAddressablesGroup(bts);
+                        UpdateHotfixAssemliesData(bts);
                     }
                 }
                 #endregion
@@ -169,7 +188,7 @@ namespace zFramework.Hotfix.Toolkit
                 #endregion
 
                 #region 绘制转存 dll 相关消息
-                if (!string.IsNullOrEmpty(message2)&&string.IsNullOrEmpty(message))
+                if (!string.IsNullOrEmpty(message2) && string.IsNullOrEmpty(message))
                 {
                     position.y += position.height + 4;
                     var tip_rect = new Rect(position);
@@ -183,6 +202,8 @@ namespace zFramework.Hotfix.Toolkit
             EditorGUI.indentLevel = indent;
             EditorGUI.EndProperty();
         }
+
+
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -199,6 +220,30 @@ namespace zFramework.Hotfix.Toolkit
             return data.height;
         }
 
+        #region  Assistant Funtions
+        private void UpdateHotfixAssemliesData(TextAsset bts)
+        {
+            var exist = HotfixAssembliesData.Instance.assemblies.Exists(v => v.editorAsset == bts);
+            if (!exist)
+            {
+                var path = AssetDatabase.GetAssetPath(bts);
+                var guid = AssetDatabase.AssetPathToGUID(path);
+                var asm = new AssetReference(guid);
+                asm.SetEditorAsset(bts);
+                HotfixAssembliesData.Instance.assemblies.Add(asm);
+                EditorUtility.SetDirty(HotfixAssembliesData.Instance);
+            }
+        }
+
+        private bool IsAddressable(TextAsset target)
+        {
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            var path = AssetDatabase.GetAssetPath(target);
+            var guid = AssetDatabase.AssetPathToGUID(path);
+            var entry = settings.FindAssetEntry(guid);
+            return null != entry;
+        }
+
         private int FirstIndexOf(AssemblyDefinitionAsset asset)
         {
             return AssemblyHotfixManager.Instance.assemblies.FindIndex(v => v.assembly == asset);
@@ -208,6 +253,7 @@ namespace zFramework.Hotfix.Toolkit
             var arr = path.Split(new string[] { "Array.data[", "]" }, StringSplitOptions.RemoveEmptyEntries);
             return Convert.ToInt32(arr[1]);
         }
+        #endregion
 
         GUIContent fixButton = new GUIContent("fix", "点击以载入,否则请断开引用关系！");
         GUIContent title_Content = new GUIContent();

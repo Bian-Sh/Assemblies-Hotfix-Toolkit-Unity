@@ -5,6 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Interfaces;
@@ -24,6 +27,9 @@ namespace zFramework.Hotfix.Toolkit
         [Header("Dll 转存文件夹"), FolderValidate]
         public DefaultAsset folder;
 
+        [Header("默认可寻址分组名")]
+        public string groupName = "Hotfix Assemblies Group";
+
         [Header("需要热更的程序集定义文件：")]
         public List<HotfixAssemblyInfo> assemblies;
 
@@ -38,6 +44,7 @@ namespace zFramework.Hotfix.Toolkit
         #region ScriptableObject Life time
         private void OnEnable()
         {
+            // 构建用于存储转存的 dll 的文件夹
             if (!IsFolderValid)
             {
                 var path = $"Assets/{container}/Addressable";
@@ -49,6 +56,9 @@ namespace zFramework.Hotfix.Toolkit
                 folder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
                 EditorUtility.SetDirty(this);
             }
+            // 初始化热更程序集集合配置文件
+            MoveToAddressablesGroup(HotfixAssembliesData.Instance);
+
             //获取所有有 Assembly-CSharp 字眼的程序集
             references = AppDomain.CurrentDomain.GetAssemblies()
                                                                   .Where(v => v.FullName.Contains("Assembly-CSharp"))
@@ -100,7 +110,7 @@ namespace zFramework.Hotfix.Toolkit
         /// <param name="asset">检查对象程序集</param>
         /// <param name="guid">检查目标程序集</param>
         /// <returns>true :被引用，false 未被引用</returns>
-        public static bool IsSomeAssemblyReferenced(AssemblyDefinitionAsset asset,string guid)
+        public static bool IsSomeAssemblyReferenced(AssemblyDefinitionAsset asset, string guid)
         {
             EditorJsonUtility.FromJsonOverwrite(asset.text, info);
             return null != info.references && info.references.Contains($"GUID:{guid}");
@@ -136,7 +146,7 @@ namespace zFramework.Hotfix.Toolkit
                 {
                     var path = AssetDatabase.GUIDToAssetPath(v);
                     var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
-                    return !IsEditorAssembly(asset)&& IsSomeAssemblyReferenced(asset,guid);
+                    return !IsEditorAssembly(asset) && IsSomeAssemblyReferenced(asset, guid);
                 })
                 .Select(v =>
                 {
@@ -185,10 +195,10 @@ namespace zFramework.Hotfix.Toolkit
         }
 
 
-        public static  bool TryGetAssemblyBytesAsset(AssemblyDefinitionAsset asm ,out TextAsset asset)
+        public static bool TryGetAssemblyBytesAsset(AssemblyDefinitionAsset asm, out TextAsset asset)
         {
             var path = AssetDatabase.GetAssetPath(Instance.folder);
-            EditorJsonUtility.FromJsonOverwrite(asm.text,info);
+            EditorJsonUtility.FromJsonOverwrite(asm.text, info);
             var file = $"{path}/{info.name}{Instance.fileExtension}";
             asset = default;
             if (File.Exists(file))
@@ -349,9 +359,37 @@ namespace zFramework.Hotfix.Toolkit
         #endregion
 
         #region Addressables Assistant
+
+
         public static void MoveToAddressablesGroup(UnityEngine.Object target)
         {
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            // case 1 : 如果可寻址还未初始化，就留给用户初始化
+            if (!settings) return;
+            
+            //case 2 ：如果已经是可寻址资产则不处理
+            var path = AssetDatabase.GetAssetPath(target);
+            var guid = AssetDatabase.AssetPathToGUID(path);
+            var entry = settings.FindAssetEntry(guid);
+            if (null != entry) return;
 
+            //case 3: 如果还不是可寻址 ，则加入到咱们的 Group 中
+            var group = settings.FindGroup(Instance.groupName);
+            //case 3.1 : 如果咱们的 Group 找不到则初始化一个
+            if (!group)
+            {
+                group = settings.CreateGroup(Instance.groupName, false, false, false, null);
+                var schema = group.AddSchema<BundledAssetGroupSchema>();
+                var method = schema.GetType().GetMethod("Validate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                method?.Invoke(schema, null);
+                schema.BundleMode = BundledAssetGroupSchema.BundlePackingMode.PackTogether;
+                group.AddSchema<ContentUpdateGroupSchema>().StaticContent = false; //如果为 false 每次都会全量更新，完全替换
+                schema.BuildPath.SetVariableByName(settings, AddressableAssetSettings.kRemoteBuildPath);
+                schema.LoadPath.SetVariableByName(settings, AddressableAssetSettings.kRemoteLoadPath);
+                group.SetDirty( AddressableAssetSettings.ModificationEvent.GroupAdded,null,false,true);
+            }
+            settings.CreateOrMoveEntry(guid, group);
+            settings.SetDirty( AddressableAssetSettings.ModificationEvent.EntryAdded,null,false,true);
         }
         #endregion
     }
