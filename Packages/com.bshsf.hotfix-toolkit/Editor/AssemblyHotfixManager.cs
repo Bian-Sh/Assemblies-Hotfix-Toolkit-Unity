@@ -136,23 +136,10 @@ namespace zFramework.Hotfix.Toolkit
         {
             if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(target, out var guid, out long _))
             {
-                var asms = asmdefs.Where(v => !Instance.assemblies.Exists(x =>
-                {
-                    var path = AssetDatabase.GUIDToAssetPath(v);
-                    var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
-                    return x.assembly == asset;
-                }))
-                .Where(v =>
-                {
-                    var path = AssetDatabase.GUIDToAssetPath(v);
-                    var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
-                    return !IsEditorAssembly(asset) && IsSomeAssemblyReferenced(asset, guid);
-                })
-                .Select(v =>
-                {
-                    var path = AssetDatabase.GUIDToAssetPath(v);
-                    return AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
-                }).ToArray();
+                var asms = asmdefs.Select(v => AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(AssetDatabase.GUIDToAssetPath(v)))
+                                                        .Where(v => !Instance.assemblies.Exists(x => x.assembly == v))
+                                                        .Where(v => !IsEditorAssembly(v) && IsSomeAssemblyReferenced(v, guid))
+                                                        .ToArray();
                 return asms;
             }
             else
@@ -366,7 +353,7 @@ namespace zFramework.Hotfix.Toolkit
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
             // case 1 : 如果可寻址还未初始化，就留给用户初始化
             if (!settings) return;
-            
+
             //case 2 ：如果已经是可寻址资产则不处理
             var path = AssetDatabase.GetAssetPath(target);
             var guid = AssetDatabase.AssetPathToGUID(path);
@@ -386,10 +373,10 @@ namespace zFramework.Hotfix.Toolkit
                 group.AddSchema<ContentUpdateGroupSchema>().StaticContent = false; //如果为 false 每次都会全量更新，完全替换
                 schema.BuildPath.SetVariableByName(settings, AddressableAssetSettings.kRemoteBuildPath);
                 schema.LoadPath.SetVariableByName(settings, AddressableAssetSettings.kRemoteLoadPath);
-                group.SetDirty( AddressableAssetSettings.ModificationEvent.GroupAdded,null,false,true);
+                group.SetDirty(AddressableAssetSettings.ModificationEvent.GroupAdded, null, false, true);
             }
             settings.CreateOrMoveEntry(guid, group);
-            settings.SetDirty( AddressableAssetSettings.ModificationEvent.EntryAdded,null,false,true);
+            settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryAdded, null, false, true);
         }
         #endregion
     }
