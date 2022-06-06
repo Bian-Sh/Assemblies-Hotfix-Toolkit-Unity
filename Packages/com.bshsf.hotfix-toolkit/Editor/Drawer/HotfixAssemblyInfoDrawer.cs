@@ -121,13 +121,13 @@ namespace zFramework.Hotfix.Toolkit
                 #endregion
 
                 #region 校验 Addressables 相关
-                if (bts&&!IsAddressable(bts))
+                if (bts)
                 {
                     if (!AddressableAssetSettingsDefaultObject.Settings)
                     {
-                        message2 = "请先通过菜单：“Window/Asset Management/Addressables/Groups” 初始化可寻址！";
+                        message2 = "请先初始化 Addressables ！";
                     }
-                    else
+                    else if (!IsAddressable(bts))
                     {
                         MoveToAddressablesGroup(bts);
                         UpdateHotfixAssemliesData(bts);
@@ -194,6 +194,14 @@ namespace zFramework.Hotfix.Toolkit
                     var tip_rect = new Rect(position);
                     tip_rect.height *= 2;
                     EditorGUI.HelpBox(tip_rect, message2, MessageType.Warning);
+                    var tip_bt_rect = new Rect(position);
+                    tip_bt_rect.x = tip_bt_rect.width - (!EditorGUIUtility.hierarchyMode ? 30 : 15);
+                    tip_bt_rect.width = 48;
+                    tip_bt_rect.y += tip_rect.height / 4;
+                    if (GUI.Button(tip_bt_rect, tipfixButton))
+                    {
+                        EditorApplication.ExecuteMenuItem("Window/Asset Management/Addressables/Groups");
+                    }
                     position.y += position.height;
                 }
                 #endregion
@@ -256,6 +264,7 @@ namespace zFramework.Hotfix.Toolkit
         #endregion
 
         GUIContent fixButton = new GUIContent("fix", "点击以载入,否则请断开引用关系！");
+        GUIContent tipfixButton = new GUIContent("fix", "点击开启 Addressables Group 配置页面！");
         GUIContent title_Content = new GUIContent();
 
     }
