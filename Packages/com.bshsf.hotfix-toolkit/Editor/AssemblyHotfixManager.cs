@@ -332,9 +332,9 @@ namespace zFramework.Hotfix.Toolkit
             {
                 if (Instance.IsFolderValid && item.assembly)    // 如果配置正确则尝试转存储文件
                 {
-                    var output = Path.Combine(AssetDatabase.GetAssetPath(Instance.folder), $"{item.assembly.name}{Instance.fileExtension}");
-                    FileUtil.ReplaceFile(Path.Combine(src, $"{item.assembly.name}.dll"), output);
-
+                    var asm_name = GetAssemblyName(item.assembly);
+                    var output = Path.Combine(AssetDatabase.GetAssetPath(Instance.folder), $"{asm_name}{Instance.fileExtension}");
+                    FileUtil.ReplaceFile(Path.Combine(src, $"{asm_name}.dll"), output);
                     AssetDatabase.Refresh();
                     var asset = AssetDatabase.LoadMainAssetAtPath(output) as TextAsset;
                     item.bytesAsset = asset;
