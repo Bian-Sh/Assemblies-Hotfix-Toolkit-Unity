@@ -16,7 +16,27 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: cb4a1005dc6965d478c2ac1db689c12e
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: a1785265277df364196604db5eed2902
+    m_Address: Assets/AssemblyHotfixToolkit/Hotfix Assemblies Data.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cce56d6a771a5bd499f7253d3de25e1c
+    m_Address: Assets/AssemblyHotfixToolkit/Addressable/zFramework.Hotfix.Examples.Datas.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 539dd83034d111b47b7e69ff0e865eb1
+    m_Address: Assets/AssemblyHotfixToolkit/Addressable/zFramework.Hotfix.Demo.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2613a85f2af5c24e91334be2ca82c72
+    m_Address: Assets/AssemblyHotfixToolkit/Addressable/zFramework.Hotfix.Examples.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 7d1985aeef47d8446ad3bc07ab68c8e5, type: 2}
   m_SchemaSet:
