@@ -62,34 +62,38 @@ namespace zFramework.Hotfix.Toolkit
             {
 
                 #region Assembly 有效性校验
-                asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
-                if (asm)
+                void AssemblyValidate()
                 {
-                    if (IsEditorAssembly(asm)) // 查是否为编辑器脚本
+                    asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
+                    if (asm)
                     {
-                        message = "编辑器程序集不可热更！ ";
-                    }
-                    else if (IsUsedByAssemblyCSharp(asm)) // 查是否被Unity基础程序集引用
-                    {
-                        message = "不能被 Assembly-CSharp 相关程序集引用！ ";
-                    }
-                    else if (GetIndexFromPropertyPath(path) != FirstIndexOf(asm) && IsAssemblyDuplicated(asm))// 查重
-                    {
-                        message = "程序集已存在！ ";
-                    }
-                    else //查有被谁引用着，这些个程序集也需要热更，或者，你修正引用关系
-                    {
-                        assets = GetAssembliesRefed(asm);
-                        if (assets.Length > 0)
+                        if (IsEditorAssembly(asm)) // 查是否为编辑器脚本
                         {
-                            message = "被以下程序集引用：";
+                            message = "编辑器程序集不可热更！ ";
+                        }
+                        else if (IsUsedByAssemblyCSharp(asm)) // 查是否被Unity基础程序集引用
+                        {
+                            message = "不能被 Assembly-CSharp 相关程序集引用！ ";
+                        }
+                        else if (GetIndexFromPropertyPath(path) != FirstIndexOf(asm) && IsAssemblyDuplicated(asm))// 查重
+                        {
+                            message = "程序集已存在！ ";
+                        }
+                        else //查有被谁引用着，这些个程序集也需要热更，或者，你修正引用关系
+                        {
+                            assets = GetAssembliesRefed(asm);
+                            if (assets.Length > 0)
+                            {
+                                message = "被以下程序集引用：";
+                            }
                         }
                     }
+                    else
+                    {
+                        message = "程序集未指定！ ";
+                    }
                 }
-                else
-                {
-                    message = "程序集未指定！ ";
-                }
+                AssemblyValidate();
                 #endregion
 
                 #region 转存的 bytes 文件校验
@@ -143,6 +147,15 @@ namespace zFramework.Hotfix.Toolkit
                     if (check.changed)
                     {
                         property.serializedObject.ApplyModifiedProperties();
+                        AssemblyValidate(); 
+                        if (ValidateAll())
+                        {
+                            asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
+                            var tree = new Tree(asm);
+                            tree.Assemblies.Reverse();
+                            Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: asm = {asm.name} - tree  {tree.Assemblies.Count}");
+                            Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: 程序集引用先后顺序是 {string.Join("\n", tree.Assemblies)}");
+                        }
                     }
                 }
                 #endregion

@@ -33,6 +33,10 @@ Preset:
     value: 
     objectReference: {fileID: 102900000, guid: 54bdeedbd6ff33b4f85ded4d73744004, type: 3}
   - target: {fileID: 0}
+    propertyPath: groupName
+    value: Hotfix Assemblies Group
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
     propertyPath: assemblies.Array.size
     value: 3
     objectReference: {fileID: 0}
@@ -51,7 +55,7 @@ Preset:
   - target: {fileID: 0}
     propertyPath: assemblies.Array.data[1].bytesAsset
     value: 
-    objectReference: {fileID: 0}
+    objectReference: {fileID: 4900000, guid: 539dd83034d111b47b7e69ff0e865eb1, type: 3}
   - target: {fileID: 0}
     propertyPath: assemblies.Array.data[2].assembly
     value: 
@@ -59,5 +63,5 @@ Preset:
   - target: {fileID: 0}
     propertyPath: assemblies.Array.data[2].bytesAsset
     value: 
-    objectReference: {fileID: 0}
+    objectReference: {fileID: 4900000, guid: b2613a85f2af5c24e91334be2ca82c72, type: 3}
   m_ExcludedProperties: []

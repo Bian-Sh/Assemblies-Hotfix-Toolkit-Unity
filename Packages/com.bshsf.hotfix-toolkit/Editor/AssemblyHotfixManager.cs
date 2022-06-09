@@ -149,7 +149,7 @@ namespace zFramework.Hotfix.Toolkit
         }
 
         /// <summary>
-        /// 像热更程序集中添加需要热更的程序集
+        /// 向热更程序集集合中添加需要热更的程序集
         /// </summary>
         /// <param name="asset"></param>
         public static void AddAssemblyData(AssemblyDefinitionAsset asset)
@@ -173,14 +173,13 @@ namespace zFramework.Hotfix.Toolkit
         /// <returns>false : 校验不通过，true ：校验通过</returns>
         public static bool ValidateAll()
         {
-            Func<HotfixAssemblyInfo, bool> Validate = info =>
-            IsEditorAssembly(info.assembly) ||
-                         IsAssemblyDuplicated(info.assembly) ||
-                         IsUsedByAssemblyCSharp(info.assembly) ||
-                         GetAssembliesRefed(info.assembly).Length > 0;
+            Func<HotfixAssemblyInfo, bool> Validate = info =>!info.assembly
+                        ||IsEditorAssembly(info.assembly) 
+                        ||IsAssemblyDuplicated(info.assembly) 
+                        ||IsUsedByAssemblyCSharp(info.assembly) 
+                        ||GetAssembliesRefed(info.assembly).Length > 0;
             return !Instance.assemblies.Any(Validate);
         }
-
 
         public static bool TryGetAssemblyBytesAsset(AssemblyDefinitionAsset asm, out TextAsset asset)
         {
@@ -194,6 +193,8 @@ namespace zFramework.Hotfix.Toolkit
             }
             return asset;
         }
+
+
         #endregion
 
 
@@ -343,6 +344,38 @@ namespace zFramework.Hotfix.Toolkit
             public string[] includePlatforms;
             public List<string> references;
         }
+
+        public class Tree
+        {
+            public List<string> Assemblies { get; private set; } = new List<string>();
+            private Stack<AssemblyDefinitionAsset> nodes = new Stack<AssemblyDefinitionAsset>();
+            private SimpleAssemblyInfo info = new SimpleAssemblyInfo();
+            public Tree(AssemblyDefinitionAsset root) => CalcAssemblyTree(root);
+
+            private void CalcAssemblyTree(AssemblyDefinitionAsset assembly)
+            {
+                EditorJsonUtility.FromJsonOverwrite(assembly.text, info);
+                // 1. 如果之前有遍历过，但是后面再次发现，以新换旧。
+                Assemblies.Remove(info.name);
+                Assemblies.Add(info.name);
+                foreach (var item in info.references)
+                {
+                    var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(AssetDatabase.GUIDToAssetPath(item.Split(':')[1]));
+                    // 2.只有存在于热更列表中的历经磨难了的 asmdef 资产才能够继续下一个循环
+                    if (Instance.assemblies.Exists(v => v.assembly == asset))
+                    {
+                        nodes.Push(assembly);
+                    }
+                }
+                //3. 后进先出，深度优先方式处理
+                if (nodes.Count != 0)
+                {
+                    var next = nodes.Pop();
+                    CalcAssemblyTree(next);
+                }
+            }
+        }
+
         #endregion
 
         #region Addressables Assistant
