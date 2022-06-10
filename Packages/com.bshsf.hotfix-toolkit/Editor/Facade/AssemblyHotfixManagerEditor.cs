@@ -93,7 +93,14 @@ namespace zFramework.Hotfix.Toolkit
                             EditorGUI.DelayedIntField(rect, list.count);
                             if (iterator.isExpanded)
                             {
-                                list.DoLayoutList();
+                                using (var check = new EditorGUI.ChangeCheckScope())
+                                {
+                                    list.DoLayoutList();
+                                    if (check.changed)
+                                    {
+                                        this.serializedObject.ApplyModifiedProperties();
+                                    }
+                                }
                             }
                         }
                         else
