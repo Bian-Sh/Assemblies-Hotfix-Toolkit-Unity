@@ -15,6 +15,8 @@ using UnityEditor.Build.Player;
 using UnityEditor.Build.Reporting;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+
 namespace zFramework.Hotfix.Toolkit
 {
     [SingletonParam(container)]
@@ -30,7 +32,7 @@ namespace zFramework.Hotfix.Toolkit
         [Header("默认可寻址分组名")]
         public string groupName = "Hotfix Assemblies Group";
 
-        [Header("需要热更的程序集定义文件：")]
+        //[Header("需要热更的程序集定义文件：")]
         public List<HotfixAssemblyInfo> assemblies;
 
         const string container = "AssemblyHotfixToolkit";
@@ -163,6 +165,7 @@ namespace zFramework.Hotfix.Toolkit
                     assembly = asset
                 };
                 Instance.assemblies.Add(data);
+                AssembliesBinaryHandler();
                 EditorUtility.SetDirty(Instance);
             }
         }
@@ -173,13 +176,14 @@ namespace zFramework.Hotfix.Toolkit
         /// <returns>false : 校验不通过，true ：校验通过</returns>
         public static bool ValidateAll()
         {
-            Func<HotfixAssemblyInfo, bool> Validate = info =>!info.assembly
-                        ||IsEditorAssembly(info.assembly) 
-                        ||IsAssemblyDuplicated(info.assembly) 
-                        ||IsUsedByAssemblyCSharp(info.assembly) 
-                        ||GetAssembliesRefed(info.assembly).Length > 0;
+            Func<HotfixAssemblyInfo, bool> Validate = info => !info.assembly
+                        || IsEditorAssembly(info.assembly)
+                        || IsAssemblyDuplicated(info.assembly)
+                        || IsUsedByAssemblyCSharp(info.assembly)
+                        || GetAssembliesRefed(info.assembly).Length > 0;
             return !Instance.assemblies.Any(Validate);
         }
+
 
         public static bool TryGetAssemblyBytesAsset(AssemblyDefinitionAsset asm, out TextAsset asset)
         {
@@ -193,8 +197,43 @@ namespace zFramework.Hotfix.Toolkit
             }
             return asset;
         }
-
-
+        /// <summary>
+        /// 对转存的 .bytes 文件进行排序，并插入到 <see cref="HotfixAssembliesData"/> 中
+        /// </summary>
+        public static void AssembliesBinaryHandler()
+        {
+            if (Instance.assemblies.Count > 0 && ValidateAll())
+            {
+                // 1. 程序集按照依赖排序
+                var root = new Tree(Instance.assemblies[0].assembly);
+                for (int i = 1; i < Instance.assemblies.Count; i++)
+                {
+                    var assembly = Instance.assemblies[i].assembly;
+                    EditorJsonUtility.FromJsonOverwrite(assembly.text, info);
+                    if (!root.Assemblies.Contains(info.name))
+                    {
+                        var tree = new Tree(assembly);
+                        root.Assemblies.Insert(0, tree.Assemblies[0]);
+                        tree.Assemblies.RemoveAt(0);
+                        var range = tree.Assemblies.Where(v => !root.Assemblies.Contains(v));
+                        root.Assemblies.InsertRange(1, range);
+                    }
+                }
+                // Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: 程序集引用先后顺序是\n {string.Join("\n", root.Assemblies)}");
+                //2. 将转存的程序集二进制放入 HotfixAssembliesData 中
+                HotfixAssembliesData.Instance.assemblies.Clear();
+                for (int i = root.Assemblies.Count - 1; i >= 0; i--)
+                {
+                    var asmInfo = Instance.assemblies.Find(v => v.bytesAsset.name == root.Assemblies[i]);
+                    var asset = new AssetReference();
+                    MoveToAddressablesGroup(HotfixAssembliesData.Instance);
+                    MoveToAddressablesGroup(asmInfo.bytesAsset);
+                    asset.SetEditorAsset(asmInfo.bytesAsset);
+                    HotfixAssembliesData.Instance.assemblies.Add(asset);
+                }
+                EditorUtility.SetDirty(HotfixAssembliesData.Instance);
+            }
+        }
         #endregion
 
 
@@ -355,20 +394,24 @@ namespace zFramework.Hotfix.Toolkit
             private void CalcAssemblyTree(AssemblyDefinitionAsset assembly)
             {
                 EditorJsonUtility.FromJsonOverwrite(assembly.text, info);
-                // 1. 如果之前有遍历过，但是后面再次发现，以新换旧。
-                Assemblies.Remove(info.name);
+                // 1. 如果之前有遍历过，但是后面再次发现，以新换旧,但不再深入。
+                var op = Assemblies.Remove(info.name);
                 Assemblies.Add(info.name);
-                foreach (var item in info.references)
+                if (!op)
                 {
-                    var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(AssetDatabase.GUIDToAssetPath(item.Split(':')[1]));
-                    // 2.只有存在于热更列表中的历经磨难了的 asmdef 资产才能够继续下一个循环
-                    if (Instance.assemblies.Exists(v => v.assembly == asset))
+                    foreach (var item in info.references)
                     {
-                        nodes.Push(assembly);
+                        var path = AssetDatabase.GUIDToAssetPath(item.Split(':')[1]);
+                        var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
+                        // 2.只有存在于热更列表中的历经磨难了的 asmdef 资产才能够继续下一个循环
+                        if (Instance.assemblies.Exists(v => v.assembly == asset))
+                        {
+                            nodes.Push(asset);
+                        }
                     }
                 }
                 //3. 后进先出，深度优先方式处理
-                if (nodes.Count != 0)
+                if (nodes.Count > 0)
                 {
                     var next = nodes.Pop();
                     CalcAssemblyTree(next);

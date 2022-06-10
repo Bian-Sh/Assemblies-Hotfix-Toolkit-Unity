@@ -11,10 +11,39 @@ namespace zFramework.Hotfix.Toolkit
         string HuatuoVersionPath = default;
         string url = @"https://github.com/focus-creative-games/huatuo_upm";
         GUIStyle style;
+        ReorderableList list;
         private void OnEnable()
         {
             HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
+            list = new ReorderableList(serializedObject, serializedObject.FindProperty("assemblies"), true, false, true, true);
+            list.drawElementCallback = OnDrawElement;
+            list.elementHeightCallback = OnGetElementHeight;
+            list.onRemoveCallback = OnRemoveCallback;
         }
+
+        #region Reorderable Drawer
+        GUIContent header = new GUIContent("需要热更的程序集");
+        private void OnRemoveCallback(ReorderableList list)
+        {
+            ReorderableList.defaultBehaviours.DoRemoveButton(list);
+            AssemblyHotfixManager.AssembliesBinaryHandler();
+        }
+        private float OnGetElementHeight(int index)
+        {
+            var item = list.serializedProperty.GetArrayElementAtIndex(index);
+            return EditorGUI.GetPropertyHeight(item);
+        }
+        private void OnDrawElement(Rect rect, int index, bool isActive, bool isFocused)
+        {
+            var item = list.serializedProperty.GetArrayElementAtIndex(index);
+            rect.x += 8;
+            rect.width -= 3;
+            EditorGUI.PropertyField(rect, item);
+        }
+        #endregion
+
+
+
         public override void OnInspectorGUI()
         {
             var targetgroup = BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
@@ -53,9 +82,32 @@ namespace zFramework.Hotfix.Toolkit
                     // 遍历每一个属性并绘制
                     while (iterator.Next(false))
                     {
-                            EditorGUILayout.PropertyField(iterator);
+                        if (iterator.name == "assemblies")
+                        {
+                            GUILayout.Space(8);
+                            iterator.isExpanded = EditorGUILayout.BeginFoldoutHeaderGroup(iterator.isExpanded, header);
+                            EditorGUILayout.EndFoldoutHeaderGroup();
+                            var rect = GUILayoutUtility.GetLastRect();
+                            rect.x = rect.width - (EditorGUIUtility.hierarchyMode ? 20f : 33f);
+                            rect.width = 36;
+                            EditorGUI.DelayedIntField(rect, list.count);
+                            if (iterator.isExpanded)
+                            {
+                                list.DoLayoutList();
+                            }
+                        }
+                        else
+                        {
+                            using (var check = new EditorGUI.ChangeCheckScope())
+                            {
+                                EditorGUILayout.PropertyField(iterator);
+                                if (check.changed)
+                                {
+                                    this.serializedObject.ApplyModifiedProperties();
+                                }
+                            }
+                        }
                     }
-                    this.serializedObject.ApplyModifiedProperties();
                 }
                 if (disable)
                 {

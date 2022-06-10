@@ -66,7 +66,7 @@ namespace zFramework.Hotfix.Toolkit
                 }
             }
             EditorGUI.indentLevel--;
-            EditorGUILayout.HelpBox("todo：自动处理被加载的程序集顺序问题", MessageType.Info);
+            EditorGUILayout.HelpBox("本配置不可修改，程序集依赖顺序自动处理。", MessageType.Info);
         }
     }
 }

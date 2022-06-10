@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditorInternal;
@@ -23,7 +22,6 @@ namespace zFramework.Hotfix.Toolkit
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-
             property.serializedObject.Update();
             position.height = EditorGUIUtility.singleLineHeight + 2;
             var indent = EditorGUI.indentLevel;
@@ -60,9 +58,20 @@ namespace zFramework.Hotfix.Toolkit
             var orign = position;
             if (property.isExpanded)
             {
-
+                #region 绘制 程序集 定义文件字段
+                position.y += position.height + 6;
+                using (var check = new EditorGUI.ChangeCheckScope())
+                {
+                    EditorGUI.PropertyField(position, property.FindPropertyRelative("assembly"));
+                    if (check.changed)
+                    {
+                        property.serializedObject.ApplyModifiedProperties();
+                        asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
+                        AssembliesBinaryHandler();
+                    }
+                }
+                #endregion
                 #region Assembly 有效性校验
-                void AssemblyValidate()
                 {
                     asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
                     if (asm)
@@ -93,7 +102,6 @@ namespace zFramework.Hotfix.Toolkit
                         message = "程序集未指定！ ";
                     }
                 }
-                AssemblyValidate();
                 #endregion
 
                 #region 转存的 bytes 文件校验
@@ -139,27 +147,6 @@ namespace zFramework.Hotfix.Toolkit
                 }
                 #endregion
 
-                #region 绘制 程序集 定义文件字段
-                position.y += position.height + 6;
-                using (var check = new EditorGUI.ChangeCheckScope())
-                {
-                    EditorGUI.PropertyField(position, property.FindPropertyRelative("assembly"));
-                    if (check.changed)
-                    {
-                        property.serializedObject.ApplyModifiedProperties();
-                        AssemblyValidate(); 
-                        if (ValidateAll())
-                        {
-                            asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
-                            var tree = new Tree(asm);
-                            tree.Assemblies.Reverse();
-                            Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: asm = {asm.name} - tree  {tree.Assemblies.Count}");
-                            Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: 程序集引用先后顺序是 {string.Join("\n", tree.Assemblies)}");
-                        }
-                    }
-                }
-                #endregion
-
                 #region Draw Message
                 data.title = !string.IsNullOrEmpty(message) || !asm ? "程序集配置异常" : asm.name;
                 if (!string.IsNullOrEmpty(message))
@@ -182,7 +169,7 @@ namespace zFramework.Hotfix.Toolkit
                         GUI.enabled = true;
 
                         var bt_rect = new Rect(position);
-                        bt_rect.x = bt_rect.width - (!EditorGUIUtility.hierarchyMode ? 30 : 15);
+                        bt_rect.x = bt_rect.width - (!EditorGUIUtility.hierarchyMode ? 33: 15);
                         bt_rect.width = 62;
                         if (GUI.Button(bt_rect, fixButton))
                         {
@@ -223,7 +210,6 @@ namespace zFramework.Hotfix.Toolkit
             EditorGUI.indentLevel = indent;
             EditorGUI.EndProperty();
         }
-
 
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

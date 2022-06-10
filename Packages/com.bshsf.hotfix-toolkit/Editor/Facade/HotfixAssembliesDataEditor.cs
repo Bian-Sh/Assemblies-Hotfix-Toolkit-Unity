@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace zFramework.Hotfix.Toolkit
 {
@@ -13,28 +8,32 @@ namespace zFramework.Hotfix.Toolkit
     {
         public override void OnInspectorGUI()
         {
-            //bool enable = GUI.enabled;
-            //GUI.enabled = false;
-            //GUI.enabled = enable;
+            bool enable = GUI.enabled;
+            GUI.enabled = false;
             base.OnInspectorGUI();
-            if (GUILayout.Button("载入热更程序集"))
+            GUI.enabled = enable;
+            var asms = serializedObject.FindProperty("assemblies");
+            if (asms.isExpanded)
             {
-                LoadAssembliesReference(target);
+                for (int i = 0; i < asms.arraySize; i++)
+                {
+                    var prop = asms.GetArrayElementAtIndex(i);
+                    var rect = GUILayoutUtility.GetLastRect();
+                    rect.x = EditorGUIUtility.currentViewWidth - 50;
+                    rect.y += 8;
+                    rect.y += (EditorGUIUtility.singleLineHeight + 1) * (i + 1);
+                    rect.height = EditorGUIUtility.singleLineHeight;
+                    rect.width -= rect.x - 10;
+                    if (GUI.Button(rect, bt_content))
+                    {
+                        var editorAsset = target as HotfixAssembliesData;
+                        EditorGUIUtility.PingObject(editorAsset.assemblies[i].editorAsset);
+                        Event.current.Use();
+                    }
+                }
             }
+            EditorGUILayout.HelpBox("本配置不可修改，程序集依赖顺序自动处理。", MessageType.Info);
         }
-
-        private void LoadAssembliesReference(UnityEngine.Object target)
-        {
-            AssetReference Selector(HotfixAssemblyInfo data)
-            {
-                var asset = new AssetReference();
-                asset.SetEditorAsset(data.bytesAsset);
-                return asset;
-            }
-            var data = target as HotfixAssembliesData;
-            data.assemblies = AssemblyHotfixManager.Instance.assemblies.Select(Selector).ToList();
-            EditorUtility.SetDirty(target);
-        }
-
+        GUIContent bt_content = new GUIContent("Ping", "高亮转存的程序集 .bytes 文件");
     }
 }
