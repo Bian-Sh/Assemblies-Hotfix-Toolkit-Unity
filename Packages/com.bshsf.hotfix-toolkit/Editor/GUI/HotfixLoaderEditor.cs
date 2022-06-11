@@ -65,7 +65,7 @@ namespace zFramework.Hotfix.Toolkit
                             var prop = asms.GetArrayElementAtIndex(i);
                             using (new EditorGUI.DisabledScope(true))
                             {
-                                EditorGUILayout.PropertyField(prop);
+                                EditorGUILayout.PropertyField(prop,GUIContent.none);
                             }
                             rect = GUILayoutUtility.GetLastRect();
                             rect.x += EditorGUIUtility.labelWidth;

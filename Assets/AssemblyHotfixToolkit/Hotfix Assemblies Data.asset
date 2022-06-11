@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Hotfix Assemblies Data
   m_EditorClassIdentifier: 
   assemblies:
-  - m_AssetGUID: cce56d6a771a5bd499f7253d3de25e1c
+  - m_AssetGUID: 539dd83034d111b47b7e69ff0e865eb1
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 1
-  - m_AssetGUID: 539dd83034d111b47b7e69ff0e865eb1
+  - m_AssetGUID: cce56d6a771a5bd499f7253d3de25e1c
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 1

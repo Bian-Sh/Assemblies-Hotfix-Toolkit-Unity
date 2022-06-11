@@ -209,7 +209,7 @@ namespace zFramework.Hotfix.Toolkit
         /// <summary>
         /// 对转存的 .bytes 文件进行排序，并插入到 <see cref="HotfixAssembliesData"/> 中
         /// </summary>
-        public static void AssembliesBinaryHandler()
+        public static bool AssembliesBinaryHandler()
         {
             if (Instance.assemblies.Count > 0 && ValidateAll() && ValidateBinaryAssets())
             {
@@ -236,7 +236,9 @@ namespace zFramework.Hotfix.Toolkit
                     HotfixAssembliesData.Instance.assemblies.Add(asset);
                 }
                 EditorUtility.SetDirty(HotfixAssembliesData.Instance);
+                return true;
             }
+            return false;
         }
 
         private static bool ValidateBinaryAssets() => Instance.assemblies.All(info => info.bytesAsset);
@@ -332,7 +334,7 @@ namespace zFramework.Hotfix.Toolkit
         #endregion
 
         #region Force Reload Assemblies
-        public static void ForceLoadAssemblies()
+        public static bool ForceLoadAssemblies()
         {
             if (ValidateAll())
             {
@@ -349,11 +351,9 @@ namespace zFramework.Hotfix.Toolkit
                 scs.target = target;
                 PlayerBuildInterface.CompilePlayerScripts(scs, buildDir);
                 StoreHotfixAssemblies(buildDir);
+                return true;
             }
-            else
-            {
-                Debug.LogError($"Hotfix Toolkit: 请先完善 Assembly Hotfix Manager 配置项！");
-            }
+            return false;
         }
         #endregion
 
