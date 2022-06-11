@@ -26,6 +26,8 @@ namespace zFramework.Hotfix.Toolkit
         private void OnRemoveCallback(ReorderableList list)
         {
             ReorderableList.defaultBehaviours.DoRemoveButton(list);
+            list.serializedProperty.serializedObject.ApplyModifiedProperties();
+
             AssemblyHotfixManager.AssembliesBinaryHandler();
         }
         private float OnGetElementHeight(int index)

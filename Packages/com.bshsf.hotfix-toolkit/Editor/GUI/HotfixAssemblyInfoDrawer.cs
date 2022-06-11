@@ -198,9 +198,18 @@ namespace zFramework.Hotfix.Toolkit
                     tip_bt_rect.x = tip_bt_rect.width - (!EditorGUIUtility.hierarchyMode ? 30 : 15);
                     tip_bt_rect.width = 48;
                     tip_bt_rect.y += tip_rect.height / 4;
-                    if (GUI.Button(tip_bt_rect, tipfixButton))
+                    var isAANG = message2 == "请先初始化 Addressables ！";
+                    if (GUI.Button(tip_bt_rect, isAANG?tipfixButton:tipfixButton_missingbytes))
                     {
-                        EditorApplication.ExecuteMenuItem("Window/Asset Management/Addressables/Groups");
+                        if (isAANG)
+                        {
+                        var CMD =  "Window/Asset Management/Addressables/Groups" ;
+                        EditorApplication.ExecuteMenuItem(CMD);
+                        }
+                        else
+                        {
+                            ForceLoadAssemblies();
+                        }
                     }
                     position.y += position.height;
                 }
@@ -264,6 +273,7 @@ namespace zFramework.Hotfix.Toolkit
 
         GUIContent fixButton = new GUIContent("fix", "点击以载入,否则请断开引用关系！");
         GUIContent tipfixButton = new GUIContent("fix", "点击开启 Addressables Group 配置页面！");
+        GUIContent tipfixButton_missingbytes = new GUIContent("fix", "点击编译程序集并转存二进制文件！");
         GUIContent title_Content = new GUIContent();
 
     }

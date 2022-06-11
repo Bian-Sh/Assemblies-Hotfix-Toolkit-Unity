@@ -162,11 +162,19 @@ namespace zFramework.Hotfix.Toolkit
                 Undo.RecordObject(Instance, "CaptureForSomeAssemblyLoaded");
                 var data = new HotfixAssemblyInfo
                 {
-                    assembly = asset
+                    assembly = asset,
                 };
+                if (TryGetAssemblyBytesAsset(asset,out var bytes))
+                {
+                    data.bytesAsset = bytes;
+                }
+                else
+                {
+                    Debug.LogWarning($"{nameof(AssemblyHotfixManager)}: 请使用 Tools/Hotfixed 窗口下的 force build 构建程序集");
+                }
                 Instance.assemblies.Add(data);
-                AssembliesBinaryHandler();
                 EditorUtility.SetDirty(Instance);
+                AssembliesBinaryHandler();
             }
         }
 
@@ -202,7 +210,7 @@ namespace zFramework.Hotfix.Toolkit
         /// </summary>
         public static void AssembliesBinaryHandler()
         {
-            if (Instance.assemblies.Count > 0 && ValidateAll())
+            if (Instance.assemblies.Count > 0 && ValidateAll() && ValidateBinaryAssets())
             {
                 // 1. 程序集按照依赖排序
                 var root = new Tree(Instance.assemblies[0].assembly);
@@ -224,7 +232,7 @@ namespace zFramework.Hotfix.Toolkit
                 HotfixAssembliesData.Instance.assemblies.Clear();
                 for (int i = root.Assemblies.Count - 1; i >= 0; i--)
                 {
-                    var asmInfo = Instance.assemblies.Find(v => v.bytesAsset.name == root.Assemblies[i]);
+                    var asmInfo = Instance.assemblies.Find(v =>v.bytesAsset.name == root.Assemblies[i]);
                     var asset = new AssetReference();
                     MoveToAddressablesGroup(HotfixAssembliesData.Instance);
                     MoveToAddressablesGroup(asmInfo.bytesAsset);
@@ -234,8 +242,9 @@ namespace zFramework.Hotfix.Toolkit
                 EditorUtility.SetDirty(HotfixAssembliesData.Instance);
             }
         }
-        #endregion
 
+        private static bool ValidateBinaryAssets() => Instance.assemblies.All(info => info.bytesAsset);
+        #endregion
 
         #region Filter Assembly files when build application
         /// <summary>
@@ -394,11 +403,17 @@ namespace zFramework.Hotfix.Toolkit
             private void CalcAssemblyTree(AssemblyDefinitionAsset assembly)
             {
                 EditorJsonUtility.FromJsonOverwrite(assembly.text, info);
-                // 1. 如果之前有遍历过，但是后面再次发现，以新换旧,但不再深入。
-                var op = Assemblies.Remove(info.name);
-                Assemblies.Add(info.name);
-                if (!op)
+                // 1. 如果之前有遍历过，但是后面再次发现，把其上一个节点插入到 此节点首次出现的位置，其他暂假设为孤立引用链而不处理。
+                int index = Assemblies.IndexOf(info.name);
+                if (index != -1)
                 {
+                    var target = Assemblies.Last();
+                    Assemblies.Insert(index, target);
+                    Assemblies.RemoveAt(Assemblies.Count - 1);
+                }
+                else
+                {
+                    Assemblies.Add(info.name);
                     foreach (var item in info.references)
                     {
                         var path = AssetDatabase.GUIDToAssetPath(item.Split(':')[1]);
