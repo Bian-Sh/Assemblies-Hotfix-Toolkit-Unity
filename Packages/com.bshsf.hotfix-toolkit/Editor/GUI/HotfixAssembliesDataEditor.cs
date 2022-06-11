@@ -33,11 +33,6 @@ namespace zFramework.Hotfix.Toolkit
                 }
             }
             EditorGUILayout.HelpBox("本配置不可修改，程序集依赖顺序自动处理。", MessageType.Info);
-            if (GUILayout.Button("Clear Data"))
-            {
-                var editorAsset = target as HotfixAssembliesData;
-                editorAsset.assemblies.Clear();
-            }
         }
         GUIContent bt_content = new GUIContent("Ping", "高亮转存的程序集 .bytes 文件");
     }

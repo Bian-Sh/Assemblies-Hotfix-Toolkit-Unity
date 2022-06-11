@@ -42,18 +42,14 @@ namespace zFramework.Hotfix.Toolkit
             var asm = property.FindPropertyRelative("assembly").objectReferenceValue as AssemblyDefinitionAsset;
             var color = EditorStyles.foldout.normal.textColor;
             data.style.normal.textColor = !asm || asm.name != data.title ? Color.red : color;
-            if (!EditorGUIUtility.hierarchyMode)
-            {
-                EditorGUI.indentLevel--;
-            }
             EditorGUIUtility.labelWidth = position.width;
             title_Content.text = data.title;
-            property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, title_Content, true, data.style);
+            var rect_foldout = new Rect(position);
+            position.x -= EditorGUIUtility.hierarchyMode ? 0 : 12;
+            property.isExpanded = EditorGUI.BeginFoldoutHeaderGroup(position, property.isExpanded, title_Content, data.style);
+            EditorGUI.EndFoldoutHeaderGroup();
             EditorGUIUtility.labelWidth = labelWidth;
-            if (!EditorGUIUtility.hierarchyMode)
-            {
-                EditorGUI.indentLevel++;
-            }
+
             #endregion
             var orign = position;
             if (property.isExpanded)
@@ -169,7 +165,7 @@ namespace zFramework.Hotfix.Toolkit
                         GUI.enabled = true;
 
                         var bt_rect = new Rect(position);
-                        bt_rect.x = bt_rect.width - (!EditorGUIUtility.hierarchyMode ? 33: 15);
+                        bt_rect.x = bt_rect.width - (!EditorGUIUtility.hierarchyMode ? 45 : 33);
                         bt_rect.width = 62;
                         if (GUI.Button(bt_rect, fixButton))
                         {
@@ -195,16 +191,16 @@ namespace zFramework.Hotfix.Toolkit
                     tip_rect.height *= 2;
                     EditorGUI.HelpBox(tip_rect, message2, MessageType.Warning);
                     var tip_bt_rect = new Rect(position);
-                    tip_bt_rect.x = tip_bt_rect.width - (!EditorGUIUtility.hierarchyMode ? 30 : 15);
+                    tip_bt_rect.x = tip_bt_rect.width - (!EditorGUIUtility.hierarchyMode ? 45 : 33);
                     tip_bt_rect.width = 48;
                     tip_bt_rect.y += tip_rect.height / 4;
                     var isAANG = message2 == "请先初始化 Addressables ！";
-                    if (GUI.Button(tip_bt_rect, isAANG?tipfixButton:tipfixButton_missingbytes))
+                    if (GUI.Button(tip_bt_rect, isAANG ? tipfixButton : tipfixButton_missingbytes))
                     {
                         if (isAANG)
                         {
-                        var CMD =  "Window/Asset Management/Addressables/Groups" ;
-                        EditorApplication.ExecuteMenuItem(CMD);
+                            var CMD = "Window/Asset Management/Addressables/Groups";
+                            EditorApplication.ExecuteMenuItem(CMD);
                         }
                         else
                         {
@@ -218,6 +214,7 @@ namespace zFramework.Hotfix.Toolkit
             data.height = position.y - orign.y + EditorGUIUtility.singleLineHeight + 6;
             EditorGUI.indentLevel = indent;
             EditorGUI.EndProperty();
+            property.serializedObject.Update();
         }
 
 

@@ -12,6 +12,7 @@ namespace zFramework.Hotfix.Toolkit
         string url = @"https://github.com/focus-creative-games/huatuo_upm";
         GUIStyle style;
         ReorderableList list;
+        Vector2 pos;
         private void OnEnable()
         {
             HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
@@ -95,12 +96,16 @@ namespace zFramework.Hotfix.Toolkit
                             EditorGUI.DelayedIntField(rect, list.count);
                             if (iterator.isExpanded)
                             {
-                                using (var check = new EditorGUI.ChangeCheckScope())
+                                using (var scroll = new EditorGUILayout.ScrollViewScope(pos))
                                 {
-                                    list.DoLayoutList();
-                                    if (check.changed)
+                                    pos = scroll.scrollPosition;
+                                    using (var check = new EditorGUI.ChangeCheckScope())
                                     {
-                                        this.serializedObject.ApplyModifiedProperties();
+                                        list.DoLayoutList();
+                                        if (check.changed)
+                                        {
+                                            this.serializedObject.ApplyModifiedProperties();
+                                        }
                                     }
                                 }
                             }

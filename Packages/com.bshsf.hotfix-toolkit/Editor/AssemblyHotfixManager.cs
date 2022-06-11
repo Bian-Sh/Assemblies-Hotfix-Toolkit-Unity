@@ -1,5 +1,6 @@
 ﻿//#define UNITY_ANDROID
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,8 +24,8 @@ namespace zFramework.Hotfix.Toolkit
     public partial class AssemblyHotfixManager : ScriptableObjectSingleton<AssemblyHotfixManager>
     {
         #region Fields
-        [Header("热更 DLL 存储的文件展名："), ReadOnly]
-        public string fileExtension = ".bytes";
+        //"热更 DLL 存储的文件展名："
+        string fileExtension = ".bytes";
 
         [Header("Dll 转存文件夹"), FolderValidate]
         public DefaultAsset folder;
@@ -164,7 +165,7 @@ namespace zFramework.Hotfix.Toolkit
                 {
                     assembly = asset,
                 };
-                if (TryGetAssemblyBytesAsset(asset,out var bytes))
+                if (TryGetAssemblyBytesAsset(asset, out var bytes))
                 {
                     data.bytesAsset = bytes;
                 }
@@ -213,26 +214,21 @@ namespace zFramework.Hotfix.Toolkit
             if (Instance.assemblies.Count > 0 && ValidateAll() && ValidateBinaryAssets())
             {
                 // 1. 程序集按照依赖排序
-                var root = new Tree(Instance.assemblies[0].assembly);
-                for (int i = 1; i < Instance.assemblies.Count; i++)
+                IEnumerable<SimpleAssemblyInfo> DependencyDataBuilder(SimpleAssemblyInfo target)
                 {
-                    var assembly = Instance.assemblies[i].assembly;
-                    EditorJsonUtility.FromJsonOverwrite(assembly.text, info);
-                    if (!root.Assemblies.Contains(info.name))
-                    {
-                        var tree = new Tree(assembly);
-                        root.Assemblies.Insert(0, tree.Assemblies[0]);
-                        tree.Assemblies.RemoveAt(0);
-                        var range = tree.Assemblies.Where(v => !root.Assemblies.Contains(v));
-                        root.Assemblies.InsertRange(1, range);
-                    }
+                    return target.references.Select(v => AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(AssetDatabase.GUIDToAssetPath(v.Split(':')[1])))
+                                                                   .Where(v => Instance.assemblies.Exists(x => x.assembly == v))
+                                                                   .Select(v => JsonUtility.FromJson<SimpleAssemblyInfo>(v.text));
                 }
-                // Debug.Log($"{nameof(HotfixAssemblyInfoDrawer)}: 程序集引用先后顺序是\n {string.Join("\n", root.Assemblies)}");
+                var sorted = Instance.assemblies.Select(v => JsonUtility.FromJson<SimpleAssemblyInfo>(v.assembly.text))
+                                                                                .TSort(DependencyDataBuilder, v => v.name)
+                                                                                .ToList();
+                Debug.LogError($"{nameof(HotfixAssemblyInfoDrawer)}: 程序集引用先后顺序是\n{string.Join("\n", sorted.Select(v => v.name))}");
                 //2. 将转存的程序集二进制放入 HotfixAssembliesData 中
                 HotfixAssembliesData.Instance.assemblies.Clear();
-                for (int i = root.Assemblies.Count - 1; i >= 0; i--)
+                for (int i = 0; i < sorted.Count; i++)
                 {
-                    var asmInfo = Instance.assemblies.Find(v =>v.bytesAsset.name == root.Assemblies[i]);
+                    var asmInfo = Instance.assemblies.Find(v => v.bytesAsset.name == sorted[i].name);
                     var asset = new AssetReference();
                     MoveToAddressablesGroup(HotfixAssembliesData.Instance);
                     MoveToAddressablesGroup(asmInfo.bytesAsset);
@@ -386,54 +382,22 @@ namespace zFramework.Hotfix.Toolkit
         }
 
         [Serializable]
-        public class SimpleAssemblyInfo
+        public class SimpleAssemblyInfo : IEqualityComparer<SimpleAssemblyInfo>
         {
             public string name;
             public string[] includePlatforms;
             public List<string> references;
-        }
 
-        public class Tree
-        {
-            public List<string> Assemblies { get; private set; } = new List<string>();
-            private Stack<AssemblyDefinitionAsset> nodes = new Stack<AssemblyDefinitionAsset>();
-            private SimpleAssemblyInfo info = new SimpleAssemblyInfo();
-            public Tree(AssemblyDefinitionAsset root) => CalcAssemblyTree(root);
-
-            private void CalcAssemblyTree(AssemblyDefinitionAsset assembly)
+            bool IEqualityComparer<SimpleAssemblyInfo>.Equals(SimpleAssemblyInfo x, SimpleAssemblyInfo y)
             {
-                EditorJsonUtility.FromJsonOverwrite(assembly.text, info);
-                // 1. 如果之前有遍历过，但是后面再次发现，把其上一个节点插入到 此节点首次出现的位置，其他暂假设为孤立引用链而不处理。
-                int index = Assemblies.IndexOf(info.name);
-                if (index != -1)
-                {
-                    var target = Assemblies.Last();
-                    Assemblies.Insert(index, target);
-                    Assemblies.RemoveAt(Assemblies.Count - 1);
-                }
-                else
-                {
-                    Assemblies.Add(info.name);
-                    foreach (var item in info.references)
-                    {
-                        var path = AssetDatabase.GUIDToAssetPath(item.Split(':')[1]);
-                        var asset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
-                        // 2.只有存在于热更列表中的历经磨难了的 asmdef 资产才能够继续下一个循环
-                        if (Instance.assemblies.Exists(v => v.assembly == asset))
-                        {
-                            nodes.Push(asset);
-                        }
-                    }
-                }
-                //3. 后进先出，深度优先方式处理
-                if (nodes.Count > 0)
-                {
-                    var next = nodes.Pop();
-                    CalcAssemblyTree(next);
-                }
+                return (x == null && y == null) || (x != null && y != null && x.name == y.name);
             }
+            int IEqualityComparer<SimpleAssemblyInfo>.GetHashCode(SimpleAssemblyInfo obj)
+            {
+                return obj == null ? 0 : obj.name.GetHashCode();
+            }
+            public override string ToString() => this.name;
         }
-
         #endregion
 
         #region Addressables Assistant
