@@ -28,8 +28,15 @@ namespace zFramework.Hotfix.Toolkit
 
         private float OnElementHeightCallback(int index)
         {
-            var item = list.serializedProperty.GetArrayElementAtIndex(index);
-            return EditorGUI.GetPropertyHeight(item);
+            if (list.count>0)
+            {
+                var item = list.serializedProperty.GetArrayElementAtIndex(index);
+                return EditorGUI.GetPropertyHeight(item);
+            }
+            else
+            {
+                return EditorGUIUtility.singleLineHeight * 2;
+            }
         }
 
         public override void OnInspectorGUI()
@@ -37,7 +44,7 @@ namespace zFramework.Hotfix.Toolkit
             GUILayout.Space(10);
             serializedObject.Update();
 
-                GUILayout.Label("转存的 .bytes 文件：",EditorStyles.boldLabel);
+            GUILayout.Label("转存的 .bytes 文件：", EditorStyles.boldLabel);
             var iterator = this.serializedObject.GetIterator();
             iterator.NextVisible(true);
             iterator.Next(false);
@@ -45,13 +52,13 @@ namespace zFramework.Hotfix.Toolkit
             bool enable = GUI.enabled;
             GUI.enabled = false;
             list?.DoLayoutList();
-            GUI.enabled = enable; 
+            GUI.enabled = enable;
             var asms = serializedObject.FindProperty("assemblies");
             for (int i = 0; i < asms.arraySize; i++)
             {
                 var rect = GUILayoutUtility.GetLastRect();
                 rect.x = EditorGUIUtility.currentViewWidth - (EditorGUIUtility.hierarchyMode ? 50 : 45);
-                rect.y -=12f ;
+                rect.y -= 12f;
                 rect.y += (EditorGUIUtility.singleLineHeight + 1.5f) * (i + 1);
                 rect.height = EditorGUIUtility.singleLineHeight;
                 rect.width -= rect.x - (EditorGUIUtility.hierarchyMode ? 10 : -8);
@@ -62,7 +69,7 @@ namespace zFramework.Hotfix.Toolkit
                     Event.current.Use();
                 }
             }
-            EditorGUILayout.HelpBox(message ,MessageType.Info);
+            EditorGUILayout.HelpBox(message, MessageType.Info);
         }
         GUIContent bt_content = new GUIContent("Ping", "高亮转存的程序集 .bytes 文件");
         string message = @"1. 本配置不可修改，工具会根据程序集依赖顺序自动进行排序。

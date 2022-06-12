@@ -1,8 +1,9 @@
-﻿using UnityEditor;
-using UnityEngine;
-
-namespace zFramework.Hotfix.Toolkit
+﻿namespace zFramework.Hotfix.Toolkit
 {
+using UnityEditor;
+using UnityEngine;
+    using static GlobalConfiguration;
+
     [CustomEditor(typeof(HotfixLoader))]
     public class HotfixLoaderEditor : Editor
     {
@@ -52,8 +53,13 @@ namespace zFramework.Hotfix.Toolkit
                             GUILayout.FlexibleSpace();
                             if (GUILayout.Button(fixbtContent, EditorStyles.miniButtonMid, GUILayout.Width(60)))
                             {
-                                AssemblyHotfixManager.ForceLoadAssemblies();
-                                AssemblyHotfixManager.AssembliesBinaryHandler();
+                                var state_a = AssemblyHotfixManager.ForceLoadAssemblies();
+                                var state_b = AssemblyHotfixManager.AssembliesBinaryHandler();
+                                if (state_a||state_b)
+                                {
+                                    Debug.LogError($"Hotfix Toolkit 配置异常请确认！");
+                                    EditorApplication.ExecuteMenuItem(MenuNode);
+                                }
                             }
                             GUILayout.FlexibleSpace();
                         }
@@ -65,7 +71,7 @@ namespace zFramework.Hotfix.Toolkit
                             var prop = asms.GetArrayElementAtIndex(i);
                             using (new EditorGUI.DisabledScope(true))
                             {
-                                EditorGUILayout.PropertyField(prop,GUIContent.none);
+                                EditorGUILayout.PropertyField(prop, GUIContent.none);
                             }
                             rect = GUILayoutUtility.GetLastRect();
                             rect.x += EditorGUIUtility.labelWidth;

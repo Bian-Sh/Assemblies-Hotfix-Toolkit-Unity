@@ -25,10 +25,6 @@ Preset:
     value: 
     objectReference: {fileID: 0}
   - target: {fileID: 0}
-    propertyPath: fileExtension
-    value: .bytes
-    objectReference: {fileID: 0}
-  - target: {fileID: 0}
     propertyPath: folder
     value: 
     objectReference: {fileID: 102900000, guid: 54bdeedbd6ff33b4f85ded4d73744004, type: 3}

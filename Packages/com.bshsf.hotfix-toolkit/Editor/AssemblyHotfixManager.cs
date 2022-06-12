@@ -27,10 +27,8 @@ namespace zFramework.Hotfix.Toolkit
         //"热更 DLL 存储的文件展名："
         string fileExtension = ".bytes";
 
-        [Header("Dll 转存文件夹"), FolderValidate]
         public DefaultAsset folder;
 
-        [Header("默认可寻址分组名")]
         public string groupName = "Hotfix Assemblies Group";
 
         //[Header("需要热更的程序集定义文件：")]
@@ -223,7 +221,7 @@ namespace zFramework.Hotfix.Toolkit
                 var sorted = Instance.assemblies.Select(v => JsonUtility.FromJson<SimpleAssemblyInfo>(v.assembly.text))
                                                                                 .TSort(DependencyDataBuilder, v => v.name)
                                                                                 .ToList();
-                Debug.LogError($"{nameof(HotfixAssemblyInfoDrawer)}: 程序集引用先后顺序是\n{string.Join("\n", sorted.Select(v => v.name))}");
+                //Debug.LogError($"{nameof(HotfixAssemblyInfoDrawer)}: 程序集引用先后顺序是\n{string.Join("\n", sorted.Select(v => v.name))}");
                 //2. 将转存的程序集二进制放入 HotfixAssembliesData 中
                 HotfixAssembliesData.Instance.assemblies.Clear();
                 for (int i = 0; i < sorted.Count; i++)

@@ -1,17 +1,19 @@
 ﻿namespace zFramework.Hotfix.Toolkit
 {
     using UnityEditor;
+    using UnityEditor.Presets;
     using UnityEngine;
     using static AssemblyHotfixManager;
+    using static GlobalConfiguration;
     public class HotfixedConfigWindow : EditorWindow
     {
         private Editor editor;
         int selected = 0;
         GUIContent[] toolbarContents;
-        [MenuItem("Tools/Hotfixed")]
+        [MenuItem(MenuNode)]
         static void OpenWindow()
         {
-            var window = GetWindow<HotfixedConfigWindow>("Dll 热更处理配置工具", true);
+            var window = GetWindow<HotfixedConfigWindow>(ToolTitle, true);
             window.toolbarContents = new GUIContent[] { BT_LT, BT_RT };
             window.editor = Editor.CreateEditor(AssemblyHotfixManager.Instance);
             window.minSize = new Vector2(360, 300);
@@ -32,9 +34,25 @@
                 }
                 GUILayout.FlexibleSpace();
             }
+            if (selected == 0)
+            {
+                var rect_preset = GUILayoutUtility.GetLastRect();
+                rect_preset.x = rect_preset.width - 15;
+                rect_preset.width = 24;
+                rect_preset.y += EditorGUIUtility.singleLineHeight * 1.2f / 4;
+                var content = EditorGUIUtility.IconContent("Preset.Context");
+                content.tooltip = "点击存储或加载 Preset .";
+                if (GUI.Button(rect_preset, content, EditorStyles.iconButton))
+                {
+                    var target = AssemblyHotfixManager.Instance ;
+                    var receiver = CreateInstance<ConfigurationPresetSelector>();
+                    receiver.Init(target,this);
+                    PresetSelector.ShowSelector(target, null, true, receiver);
+                }
+            }
+            GUILayout.Space(15);
             using (new EditorGUILayout.VerticalScope())
             {
-
                 if (selected == 0)
                 {
                     Editor.CreateCachedEditor(AssemblyHotfixManager.Instance, typeof(AssemblyHotfixManagerEditor), ref editor);

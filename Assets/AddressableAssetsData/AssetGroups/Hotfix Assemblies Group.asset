@@ -32,6 +32,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2613a85f2af5c24e91334be2ca82c72
+    m_Address: Assets/AssemblyHotfixToolkit/Addressable/zFramework.Hotfix.Examples.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 7d1985aeef47d8446ad3bc07ab68c8e5, type: 2}
   m_SchemaSet:

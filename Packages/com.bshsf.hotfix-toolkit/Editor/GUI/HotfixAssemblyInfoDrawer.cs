@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEditor;
-using UnityEditor.AddressableAssets;
-using UnityEditorInternal;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
-
-namespace zFramework.Hotfix.Toolkit
+﻿namespace zFramework.Hotfix.Toolkit
 {
+    using System;
+    using System.Collections.Generic;
+    using UnityEditor;
+    using UnityEditor.AddressableAssets;
+    using UnityEditorInternal;
+    using UnityEngine;
+    using UnityEngine.AddressableAssets;
     using static AssemblyHotfixManager;
+    using static GlobalConfiguration;
+
     [CustomPropertyDrawer(typeof(HotfixAssemblyInfo))]
     public class HotfixAssemblyInfoDrawer : PropertyDrawer
     {
@@ -199,8 +200,7 @@ namespace zFramework.Hotfix.Toolkit
                     {
                         if (isAANG)
                         {
-                            var CMD = "Window/Asset Management/Addressables/Groups";
-                            EditorApplication.ExecuteMenuItem(CMD);
+                            EditorApplication.ExecuteMenuItem(AAMenuNode);
                         }
                         else
                         {
