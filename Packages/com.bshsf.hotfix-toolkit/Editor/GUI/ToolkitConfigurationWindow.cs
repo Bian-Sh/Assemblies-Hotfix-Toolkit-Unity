@@ -5,7 +5,7 @@
     using UnityEngine;
     using static AssemblyHotfixManager;
     using static GlobalConfiguration;
-    public class HotfixedConfigWindow : EditorWindow
+    public class ToolkitConfigurationWindow : EditorWindow
     {
         private Editor editor;
         int selected = 0;
@@ -13,7 +13,7 @@
         [MenuItem(MenuNode)]
         static void OpenWindow()
         {
-            var window = GetWindow<HotfixedConfigWindow>(ToolTitle, true);
+            var window = GetWindow<ToolkitConfigurationWindow>(ToolTitle, true);
             window.toolbarContents = new GUIContent[] { BT_LT, BT_RT };
             window.editor = Editor.CreateEditor(AssemblyHotfixManager.Instance);
             window.minSize = new Vector2(360, 300);
@@ -45,7 +45,7 @@
                 if (GUI.Button(rect_preset, content, EditorStyles.iconButton))
                 {
                     var target = AssemblyHotfixManager.Instance ;
-                    var receiver = CreateInstance<ConfigurationPresetSelector>();
+                    var receiver = CreateInstance<PresetReceiver>();
                     receiver.Init(target,this);
                     PresetSelector.ShowSelector(target, null, true, receiver);
                 }

@@ -11,9 +11,11 @@ namespace zFramework.Hotfix.Toolkit
         private void OnEnable()
         {
             var arr = serializedObject.FindProperty("assemblies");
-            list = new ReorderableList(serializedObject, arr, false, false, false, false);
-            list.elementHeightCallback = OnElementHeightCallback;
-            list.drawElementCallback = OnDrawElements;
+            list = new ReorderableList(serializedObject, arr, false, false, false, false)
+            {
+                elementHeightCallback = OnElementHeightCallback,
+                drawElementCallback = OnDrawElements
+            };
         }
 
         private void OnDrawElements(Rect rect, int index, bool isActive, bool isFocused)

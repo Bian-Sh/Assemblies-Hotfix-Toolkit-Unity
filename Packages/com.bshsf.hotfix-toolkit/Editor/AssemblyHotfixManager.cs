@@ -135,18 +135,11 @@ namespace zFramework.Hotfix.Toolkit
         /// <returns></returns>
         public static AssemblyDefinitionAsset[] GetAssembliesRefed(AssemblyDefinitionAsset target)
         {
-            if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(target, out var guid, out long _))
-            {
-                var asms = asmdefs.Select(v => AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(AssetDatabase.GUIDToAssetPath(v)))
-                                                        .Where(v => !Instance.assemblies.Exists(x => x.assembly == v))
-                                                        .Where(v => !IsEditorAssembly(v) && IsSomeAssemblyReferenced(v, guid))
-                                                        .ToArray();
-                return asms;
-            }
-            else
-            {
-                throw new Exception("Unity 资产转 guid 失败!");
-            }
+                var guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(target));
+                return asmdefs.Select(v => AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(AssetDatabase.GUIDToAssetPath(v)))
+                                              .Where(v => !Instance.assemblies.Exists(x => x.assembly == v))
+                                              .Where(v => !IsEditorAssembly(v) && IsSomeAssemblyReferenced(v, guid))
+                                              .ToArray();
         }
 
         /// <summary>
@@ -378,29 +371,9 @@ namespace zFramework.Hotfix.Toolkit
             }
             return ReturnCode.Success;
         }
-
-        [Serializable]
-        public class SimpleAssemblyInfo : IEqualityComparer<SimpleAssemblyInfo>
-        {
-            public string name;
-            public string[] includePlatforms;
-            public List<string> references;
-
-            bool IEqualityComparer<SimpleAssemblyInfo>.Equals(SimpleAssemblyInfo x, SimpleAssemblyInfo y)
-            {
-                return (x == null && y == null) || (x != null && y != null && x.name == y.name);
-            }
-            int IEqualityComparer<SimpleAssemblyInfo>.GetHashCode(SimpleAssemblyInfo obj)
-            {
-                return obj == null ? 0 : obj.name.GetHashCode();
-            }
-            public override string ToString() => this.name;
-        }
         #endregion
 
         #region Addressables Assistant
-
-
         public static void MoveToAddressablesGroup(UnityEngine.Object target)
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;

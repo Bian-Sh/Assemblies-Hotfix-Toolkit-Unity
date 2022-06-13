@@ -216,8 +216,6 @@
             EditorGUI.EndProperty();
             property.serializedObject.Update();
         }
-
-
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             var assemblis = property.FindPropertyRelative("assembly");
@@ -272,6 +270,5 @@
         GUIContent tipfixButton = new GUIContent("fix", "点击开启 Addressables Group 配置页面！");
         GUIContent tipfixButton_missingbytes = new GUIContent("fix", "点击编译程序集并转存二进制文件！");
         GUIContent title_Content = new GUIContent();
-
     }
 }

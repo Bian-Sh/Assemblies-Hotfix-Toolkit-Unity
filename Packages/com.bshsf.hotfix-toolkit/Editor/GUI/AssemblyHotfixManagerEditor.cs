@@ -53,8 +53,6 @@
         }
         #endregion
 
-
-
         public override void OnInspectorGUI()
         {
             var targetgroup = BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
@@ -132,10 +130,7 @@
                                 }
                                 using (new EditorGUILayout.HorizontalScope())
                                 {
-                                    var labelWidth = EditorGUIUtility.labelWidth;
-                                    //EditorGUIUtility.labelWidth = 10;
                                     EditorGUILayout.LabelField(content, EditorStyles.boldLabel, GUILayout.Width(160));
-                                    //EditorGUIUtility.labelWidth = labelWidth;
                                     EditorGUILayout.PropertyField(iterator, GUIContent.none);
                                 }
                                 EditorGUILayout.Space(6);

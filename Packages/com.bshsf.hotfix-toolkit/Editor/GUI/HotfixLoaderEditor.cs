@@ -1,7 +1,7 @@
 ﻿namespace zFramework.Hotfix.Toolkit
 {
-using UnityEditor;
-using UnityEngine;
+    using UnityEditor;
+    using UnityEngine;
     using static GlobalConfiguration;
 
     [CustomEditor(typeof(HotfixLoader))]
@@ -11,7 +11,6 @@ using UnityEngine;
         SerializedObject so;
         HotfixLoader loader;
         private GUIContent fixbtContent = new GUIContent("fix", "点击构建并加载程序集转存文件");
-
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
@@ -55,7 +54,7 @@ using UnityEngine;
                             {
                                 var state_a = AssemblyHotfixManager.ForceLoadAssemblies();
                                 var state_b = AssemblyHotfixManager.AssembliesBinaryHandler();
-                                if (state_a||state_b)
+                                if (state_a || state_b)
                                 {
                                     Debug.LogError($"Hotfix Toolkit 配置异常请确认！");
                                     EditorApplication.ExecuteMenuItem(MenuNode);
