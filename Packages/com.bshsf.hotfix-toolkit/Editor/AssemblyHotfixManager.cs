@@ -62,7 +62,7 @@ namespace zFramework.Hotfix.Toolkit
 
             //获取所有有 Assembly-CSharp 字眼的程序集
             references = AppDomain.CurrentDomain.GetAssemblies()
-                                                                  .Where(v => v.FullName.Contains("Assembly-CSharp"))
+                                                                  .Where(v => v.FullName.Contains("Assembly-CSharp")&& !v.FullName.Contains("Editor"))
                                                                   .SelectMany(v => v.GetReferencedAssemblies());
 
             //获取所有非只读的，可能会引用热更程序集的 Runtime 程序集
