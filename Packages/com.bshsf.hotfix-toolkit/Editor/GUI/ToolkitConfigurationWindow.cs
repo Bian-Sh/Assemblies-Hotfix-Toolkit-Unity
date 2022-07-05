@@ -10,6 +10,7 @@
         private Editor editor;
         int selected = 0;
         GUIContent[] toolbarContents;
+        GUIStyle m_IconButton;
         [MenuItem(MenuNode)]
         static void OpenWindow()
         {
@@ -42,7 +43,8 @@
                 rect_preset.y += EditorGUIUtility.singleLineHeight * 1.2f / 4;
                 var content = EditorGUIUtility.IconContent("Preset.Context");
                 content.tooltip = "点击存储或加载 Preset .";
-                if (GUI.Button(rect_preset, content, EditorStyles.iconButton))
+                m_IconButton??= GUI.skin.GetStyle("IconButton");
+                if (GUI.Button(rect_preset, content,m_IconButton))
                 {
                     var target = AssemblyHotfixManager.Instance ;
                     var receiver = CreateInstance<PresetReceiver>();
