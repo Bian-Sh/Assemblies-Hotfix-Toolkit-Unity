@@ -54,7 +54,7 @@
 2. scripting backend ： mono 默认支持逻辑热更，适用于 PC 和 安卓
 3. scripting backend ： il2cpp 请先安装 huatuo 以支持全平台的逻辑热更。
 4. 拿本项目测试的同学请先清除 aa 相关缓存。
-5. 具体使用流程是：
+5. 热更程序集处理流程：
 > 对需要热更的模块添加 assembly definition file  
 > 
 > 👉 拖入此 .asmdef（assembly definition file）文件到本工具 Editor 页面 
@@ -64,11 +64,22 @@
 > 👉 新增 .asmdef 文件后需要点击下方“Assembly Force Build”按钮
 > 
 > 👉 其余为工具自动操作：打 AA（Addressabls）自动转存 .bytes 文件，打app 自动剔除热更逻辑
+6. 热更测试流程：
+> 👉 使用 Addressables Group 窗口打个首 AB 包
 > 
+> 👉 使用 Build Settings 窗口打个首包,譬如：aa.exe
+>
+> 👉 修改热更程序集种的逻辑为自己想要输出的
+> 
+> 👉 使用 Addressables Group 窗口打 Update  a previous build  打 ab 的更新包
+> 
+> 👉 重启打包的应用即可看到修改的逻辑生效，至此热更演示完成！
+
 6. 友情提示：
 
     a. il2cpp 逻辑热更需要深度学习一下相关的限制及应对措施(主要围绕类型裁剪)！
     
     b. mono 逻辑热更，Serializable Type 即便通过 inspector 赋值了，也无法在 ab 中正常使用，[👉 更多](https://forum.unity.com/threads/advanced-use-case-assetbundles-and-dynamically-loaded-assemblies.737183/)
 
+    c. 由于风云聚变，目前huatuo已经转变为 wolong ，且安装流程发生了变化，本工具判定 huatuo 安装与否的逻辑已经不适用 wolong ，注释掉逻辑即可 （后期我会将 wolong 安装也内嵌到本工具）。
 
