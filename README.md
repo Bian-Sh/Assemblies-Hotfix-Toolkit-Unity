@@ -82,4 +82,4 @@
     b. mono 逻辑热更，Serializable Type 即便通过 inspector 赋值了，也无法在 ab 中正常使用，[👉 更多](https://forum.unity.com/threads/advanced-use-case-assetbundles-and-dynamically-loaded-assemblies.737183/)
 
     c. 由于风云聚变，目前huatuo已经转变为 wolong ，且安装流程发生了变化，本工具判定 huatuo 安装与否的逻辑已经不适用 wolong ，注释掉逻辑即可 （后期我会将 wolong 安装也内嵌到本工具）。
-
+    d. hybridclr(wolong) 目前正在积极的开发一键部署工具，后面使用方式会更加简单，届时这个仓库也会同步更新、集成官方相关工作流。
